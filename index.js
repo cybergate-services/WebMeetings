@@ -65,7 +65,9 @@ async function runServer() {
 }
 
 async function runMediasoupWorkers() {
-    logger.info('running %d mediasoup Workers...', numWorkers);
+    const { numWorkers } = config.mediasoup;
+
+	logger.info('running %d mediasoup Workers...', numWorkers);
 
     for (let i = 0; i < numWorkers; ++i) {
         const worker = await mediasoup.createWorker(

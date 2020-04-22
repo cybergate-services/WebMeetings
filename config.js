@@ -5,7 +5,7 @@ module.exports =
 	mediasoup :
 	{
 		// Number of mediasoup workers to launch.
-		numWorkers : Object.keys(os.cpus()).length,
+		numWorkers : Object.keys(os.cpus()).length || 2,
 		// mediasoup WorkerSettings.
 		// See https://mediasoup.org/documentation/v3/mediasoup/api/#WorkerSettings
 		workerSettings :
