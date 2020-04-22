@@ -40,6 +40,9 @@ class Room extends protooServer.Room {
     }
 
     handleConnection(peer) {
+        logger.info(
+            'handleConnection [peerId:%s]', peer.id);
+
         peer.data.transports = new Map();
         peer.data.producers = new Map();
         peer.data.consumers = new Map();
