@@ -35,14 +35,14 @@ async function run() {
     await new Promise((resolve) =>
 	{
 		httpServer.listen(80, resolve);
-	});
+    });
+    
+    logger.info('listening on port 80');
 
     await runServer();
 }
 
 async function createRoom() {
-    let { mediaCodecs } = config.mediasoup.routerOptions;
-
     const mediasoupWorker = getMediasoupWorker();
 
     rooms.set("default", await Room.create(mediasoupWorker));
@@ -52,6 +52,7 @@ async function runServer() {
     server = new protooServer.WebSocketServer(httpServer, options);
 
     server.on('connectionrequest', async (info, accept, reject) => {
+        logger.info('connection request');
         // The app inspects the `info` object and decides whether to accept the
         // connection or not.  
         try {
