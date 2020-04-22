@@ -707,6 +707,9 @@ class Room extends protooServer.Room {
 
                     break;
                 }
+                default:
+                    logger.error('unkown method %s', request.method);
+                    break;
 
         }
     }
