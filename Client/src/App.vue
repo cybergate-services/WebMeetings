@@ -39,7 +39,7 @@ export default {
   },
   created() {
     const protooTransport = new protooClient.WebSocketTransport(
-      "wss://commercifly.ml"
+      "ws://localhost:8080/socket"
     );
 
     this.peer = new protooClient.Peer(protooTransport);

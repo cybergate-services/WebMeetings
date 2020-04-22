@@ -32,9 +32,12 @@ async function run() {
 
     await createRoom();
 
-    await runServer();
+    await new Promise((resolve) =>
+	{
+		httpServer.listen(80, resolve);
+	});
 
-    httpServer.listen(80);
+    await runServer();
 }
 
 async function createRoom() {

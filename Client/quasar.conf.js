@@ -84,7 +84,15 @@ module.exports = function (/* ctx */) {
     devServer: {
       https: true,
       port: 8080,
-      open: true,
+      open: true, // opens browser window automatically,
+      proxy: {
+        // proxy all requests starting with /api to jsonplaceholder
+        '/socket': {
+          target: 'ws://23.236.49.182',
+          changeOrigin: true,
+          ws: true
+        }
+      }
 
 
     },
