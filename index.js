@@ -23,7 +23,7 @@ const options =
     fragmentationThreshold: 960000
 };
 
-const server = new protooServer.WebSocketServer(httpServer, options);
+let server;
 
 const rooms = new Map();
 
@@ -49,6 +49,8 @@ async function createRoom() {
 }
 
 async function runServer() {
+    server = new protooServer.WebSocketServer(httpServer, options);
+
     server.on('connectionrequest', async (info, accept, reject) => {
         // The app inspects the `info` object and decides whether to accept the
         // connection or not.  
