@@ -18,6 +18,8 @@ class Room extends protooServer.Room {
     }
 
     constructor(mediasoupWorker, mediasoupRouter, audioLevelObserver) {
+        super();
+        
         this.mediasoupWorker = mediasoupWorker;
         this.mediasoupRouter = mediasoupRouter;
         this.audioLevelObserver = audioLevelObserver;
