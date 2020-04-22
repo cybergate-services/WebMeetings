@@ -61,10 +61,14 @@ async function runServer() {
             // The app chooses a `peerId` and creates a peer within a specific room.
             const peer = await room.createPeer(cuid(), transport);
 
+            console.log('peer created %s', peer.id);
+
             room.handleConnection(peer);
 
         }
         catch (ex) {
+            console.error(ex);
+
             reject(403, 'Not Allowed');
         };
     });
