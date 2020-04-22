@@ -3,7 +3,7 @@ const config = require("./config");
 
 class Room extends protooServer.Room {
     static async create(mediasoupWorker) {
-		let { mediaCodecs } = config.mediasoup.routerOptions;
+        let { mediaCodecs } = config.mediasoup.routerOptions;
 
         const mediasoupRouter = await mediasoupWorker.createRouter({ mediaCodecs });
 
@@ -19,24 +19,19 @@ class Room extends protooServer.Room {
 
     constructor(mediasoupWorker, mediasoupRouter, audioLevelObserver) {
         super();
-        
+
         this.mediasoupWorker = mediasoupWorker;
         this.mediasoupRouter = mediasoupRouter;
         this.audioLevelObserver = audioLevelObserver;
-
-        this.closed = false;
 
         this.handleAudioLevelObserver();
     }
 
     close() {
-        if (!this.closed) {
-            this.closed = true;
+        super.close();
 
-            super.close();
+        this.mediasoupRouter.close();
 
-            this.mediasoupRouter.close();
-        }
     }
 
     getJoinedPeers(predicate = peer => true) {
@@ -716,41 +711,36 @@ class Room extends protooServer.Room {
         }
     }
 
-    handleAudioLevelObserver()
-	{
-		this.audioLevelObserver.on('volumes', (volumes) =>
-		{
-			const { producer, volume } = volumes[0];
+    handleAudioLevelObserver() {
+        this.audioLevelObserver.on('volumes', (volumes) => {
+            const { producer, volume } = volumes[0];
 
-			// logger.debug(
-			// 	'audioLevelObserver "volumes" event [producerId:%s, volume:%s]',
-			// 	producer.id, volume);
+            // logger.debug(
+            // 	'audioLevelObserver "volumes" event [producerId:%s, volume:%s]',
+            // 	producer.id, volume);
 
-			// Notify all Peers.
-			for (const peer of this.getJoinedPeers())
-			{
-				peer.notify(
-					'activeSpeaker',
-					{
-						peerId : producer.appData.peerId,
-						volume : volume
-					})
-					.catch(() => {});
-			}
-		});
+            // Notify all Peers.
+            for (const peer of this.getJoinedPeers()) {
+                peer.notify(
+                    'activeSpeaker',
+                    {
+                        peerId: producer.appData.peerId,
+                        volume: volume
+                    })
+                    .catch(() => { });
+            }
+        });
 
-		this.audioLevelObserver.on('silence', () =>
-		{
-			// logger.debug('audioLevelObserver "silence" event');
+        this.audioLevelObserver.on('silence', () => {
+            // logger.debug('audioLevelObserver "silence" event');
 
-			// Notify all Peers.
-			for (const peer of this.getJoinedPeers())
-			{
-				peer.notify('activeSpeaker', { peerId: null })
-					.catch(() => {});
-			}
-		});
-	}
+            // Notify all Peers.
+            for (const peer of this.getJoinedPeers()) {
+                peer.notify('activeSpeaker', { peerId: null })
+                    .catch(() => { });
+            }
+        });
+    }
 }
 
 module.exports = Room;
