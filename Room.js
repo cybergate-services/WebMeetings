@@ -3,6 +3,8 @@ const config = require("./config");
 
 class Room extends protooServer.Room {
     static async create(mediasoupWorker) {
+		let { mediaCodecs } = config.mediasoup.routerOptions;
+
         const mediasoupRouter = await mediasoupWorker.createRouter({ mediaCodecs });
 
         const audioLevelObserver = await mediasoupRouter.createAudioLevelObserver(
