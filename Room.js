@@ -47,7 +47,7 @@ class Room extends protooServer.Room {
         peer.data.dataConsumers = new Map();
 
         peer.on('request', (request, accept, reject) => {
-            logger.debug(
+            logger.info(
                 'protoo Peer "request" event [method:%s, peerId:%s]',
                 request.method, peer.id);
 

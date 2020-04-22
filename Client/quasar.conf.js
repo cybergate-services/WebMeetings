@@ -82,13 +82,13 @@ module.exports = function (/* ctx */) {
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
-      https: true,
+      https: false,
       port: 8080,
       open: true, // opens browser window automatically,
       proxy: {
         // proxy all requests starting with /api to jsonplaceholder
         '/socket': {
-          target: 'ws://23.236.49.182',
+          target: 'ws://23.236.49.182:80',
           changeOrigin: true,
           ws: true
         }
