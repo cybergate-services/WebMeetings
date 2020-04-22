@@ -52,7 +52,6 @@ async function runServer() {
     server = new protooServer.WebSocketServer(httpServer, options);
 
     server.on('connectionrequest', async (info, accept, reject) => {
-        logger.info('connection request');
         // The app inspects the `info` object and decides whether to accept the
         // connection or not.  
         try {

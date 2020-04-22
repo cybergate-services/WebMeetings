@@ -40,7 +40,7 @@ class Room extends protooServer.Room {
     }
 
     handleConnection(peer) {
-        logger.info(
+        console.info(
             'handleConnection [peerId:%s]', peer.id);
 
         peer.data.transports = new Map();
@@ -50,7 +50,7 @@ class Room extends protooServer.Room {
         peer.data.dataConsumers = new Map();
 
         peer.on('request', (request, accept, reject) => {
-            logger.info(
+            console.info(
                 'protoo Peer "request" event [method:%s, peerId:%s]',
                 request.method, peer.id);
 
@@ -60,7 +60,7 @@ class Room extends protooServer.Room {
         });
 
         peer.on('close', () => {
-            logger.debug('protoo Peer "close" event [peerId:%s]', peer.id);
+            console.debug('protoo Peer "close" event [peerId:%s]', peer.id);
 
             // If the Peer was joined, notify all Peers.
             if (peer.data.joined) {
@@ -120,7 +120,7 @@ class Room extends protooServer.Room {
 
         // This should not happen.
         if (!transport) {
-            logger.warn('_createConsumer() | Transport for consuming not found');
+            console.warn('_createConsumer() | Transport for consuming not found');
 
             return;
         }
@@ -137,7 +137,7 @@ class Room extends protooServer.Room {
                 });
         }
         catch (error) {
-            logger.warn('_createConsumer() | transport.consume():%o', error);
+            console.warn('_createConsumer() | transport.consume():%o', error);
 
             return;
         }
@@ -170,7 +170,7 @@ class Room extends protooServer.Room {
         });
 
         consumer.on('score', (score) => {
-            // logger.debug(
+            // console.debug(
             // 	'consumer "score" event [consumerId:%s, score:%o]',
             // 	consumer.id, score);
 
@@ -195,7 +195,7 @@ class Room extends protooServer.Room {
         // await consumer.enableTraceEvent([ 'keyframe' ]);
 
         consumer.on('trace', (trace) => {
-            logger.info(
+            console.info(
                 'consumer "trace" event [producerId:%s, trace.type:%s, trace:%o]',
                 consumer.id, trace.type, trace);
         });
@@ -230,7 +230,7 @@ class Room extends protooServer.Room {
                 .catch(() => { });
         }
         catch (error) {
-            logger.warn('createConsumer() | failed:%o', error);
+            console.warn('createConsumer() | failed:%o', error);
         }
     }
 
@@ -313,12 +313,12 @@ class Room extends protooServer.Room {
                         webRtcTransportOptions);
 
                     transport.on('sctpstatechange', (sctpState) => {
-                        logger.debug('WebRtcTransport "sctpstatechange" event [sctpState:%s]', sctpState);
+                        console.debug('WebRtcTransport "sctpstatechange" event [sctpState:%s]', sctpState);
                     });
 
                     transport.on('dtlsstatechange', (dtlsState) => {
                         if (dtlsState === 'failed' || dtlsState === 'closed')
-                            logger.warn('WebRtcTransport "dtlsstatechange" event [dtlsState:%s]', dtlsState);
+                            console.warn('WebRtcTransport "dtlsstatechange" event [dtlsState:%s]', dtlsState);
                     });
 
                     // NOTE: For testing.
@@ -326,7 +326,7 @@ class Room extends protooServer.Room {
                     // await transport.enableTraceEvent([ 'bwe' ]);
 
                     transport.on('trace', (trace) => {
-                        logger.info(
+                        console.info(
                             'transport "trace" event [transportId:%s, trace.type:%s, trace:%o]',
                             transport.id, trace.type, trace);
                     });
@@ -410,7 +410,7 @@ class Room extends protooServer.Room {
 
                     // Set Producer events.
                     producer.on('score', (score) => {
-                        // logger.debug(
+                        // console.debug(
                         // 	'producer "score" event [producerId:%s, score:%o]',
                         // 	producer.id, score);
 
@@ -419,7 +419,7 @@ class Room extends protooServer.Room {
                     });
 
                     producer.on('videoorientationchange', (videoOrientation) => {
-                        logger.debug(
+                        console.debug(
                             'producer "videoorientationchange" event [producerId:%s, videoOrientation:%o]',
                             producer.id, videoOrientation);
                     });
@@ -430,7 +430,7 @@ class Room extends protooServer.Room {
                     // await producer.enableTraceEvent([ 'keyframe' ]);
 
                     producer.on('trace', (trace) => {
-                        logger.info(
+                        console.info(
                             'producer "trace" event [producerId:%s, trace.type:%s, trace:%o]',
                             producer.id, trace.type, trace);
                     });
@@ -668,7 +668,7 @@ class Room extends protooServer.Room {
                                 rtt: rtt || DefaultRtt
                             });
 
-                        logger.warn(
+                        console.warn(
                             'network throttle set [uplink:%s, downlink:%s, rtt:%s]',
                             uplink || DefaultUplink,
                             downlink || DefaultDownlink,
@@ -677,7 +677,7 @@ class Room extends protooServer.Room {
                         accept();
                     }
                     catch (error) {
-                        logger.error('network throttle apply failed: %o', error);
+                        console.error('network throttle apply failed: %o', error);
 
                         reject(500, error.toString());
                     }
@@ -698,12 +698,12 @@ class Room extends protooServer.Room {
                     try {
                         await throttle.stop({});
 
-                        logger.warn('network throttle stopped');
+                        console.warn('network throttle stopped');
 
                         accept();
                     }
                     catch (error) {
-                        logger.error('network throttle stop failed: %o', error);
+                        console.error('network throttle stop failed: %o', error);
 
                         reject(500, error.toString());
                     }
@@ -711,7 +711,7 @@ class Room extends protooServer.Room {
                     break;
                 }
                 default:
-                    logger.error('unkown method %s', request.method);
+                    console.error('unkown method %s', request.method);
                     break;
 
         }
@@ -721,7 +721,7 @@ class Room extends protooServer.Room {
         this.audioLevelObserver.on('volumes', (volumes) => {
             const { producer, volume } = volumes[0];
 
-            // logger.debug(
+            // console.debug(
             // 	'audioLevelObserver "volumes" event [producerId:%s, volume:%s]',
             // 	producer.id, volume);
 
@@ -738,7 +738,7 @@ class Room extends protooServer.Room {
         });
 
         this.audioLevelObserver.on('silence', () => {
-            // logger.debug('audioLevelObserver "silence" event');
+            // console.debug('audioLevelObserver "silence" event');
 
             // Notify all Peers.
             for (const peer of this.getJoinedPeers()) {
