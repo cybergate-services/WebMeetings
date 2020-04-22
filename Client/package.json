@@ -13,6 +13,8 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "axios": "^0.18.1",
+    "mediasoup-client": "github:versatica/mediasoup-client#v3",
+    "protoo-client": "^4.0.3",
     "quasar": "^1.0.0"
   },
   "devDependencies": {

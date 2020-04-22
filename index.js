@@ -34,7 +34,7 @@ async function run() {
 
     await runServer();
 
-    httpServer.listen(8080);
+    httpServer.listen(80);
 }
 
 async function createRoom() {
