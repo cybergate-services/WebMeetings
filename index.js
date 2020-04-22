@@ -23,7 +23,7 @@ const options =
     fragmentationThreshold: 960000
 };
 
-const server = new protooServer.WebSocketServer.Room(httpServer, options);
+const server = new protooServer.WebSocketServer(httpServer, options);
 
 const rooms = new Map();
 
