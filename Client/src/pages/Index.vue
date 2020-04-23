@@ -138,6 +138,17 @@ export default {
     }
   },
   methods: {
+    getWebcamType(device) {
+      if (/(back|rear)/i.test(device.label)) {
+        console.debug("getWebcamType() | it seems to be a back camera");
+
+        return "back";
+      } else {
+        console.debug("getWebcamType() | it seems to be a front camera");
+
+        return "front";
+      }
+    },
     async enableWebcam() {
       console.debug("enableWebcam()");
 
