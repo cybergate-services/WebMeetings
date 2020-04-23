@@ -1,17 +1,54 @@
 <template>
-  <q-page class="flex flex-center">
-    <VideoContainer
-      @enableShare="enableShare"
-      @disableShare="disableShare"
-      :sharingScreen="shareProducer != null"
-    />
-  </q-page>
+  <q-layout view="lHh Lpr lFf">
+    <q-header elevated>
+      <q-toolbar>
+        <q-btn
+          flat
+          dense
+          round
+          :icon="evaMenuOutline"
+          aria-label="Menu"
+          @click="leftDrawerOpen = !leftDrawerOpen"
+        />
+
+        <q-toolbar-title>Quasar</q-toolbar-title>
+      </q-toolbar>
+    </q-header>
+
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1 text-black">
+      <q-list>
+        <q-item-label header class="text-bold">Participantes</q-item-label>
+        <q-item v-for="peer in Object.values(peers)" :key="peer.id" clickable v-ripple>
+          <q-item-section>{{peer.displayName}}</q-item-section>
+        </q-item>
+      </q-list>
+    </q-drawer>
+
+    <q-page-container>
+      <q-page class="flex flex-center">
+        <VideoContainer
+          @enableShare="enableShare"
+          @disableShare="disableShare"
+          :sharingScreen="shareProducer != null"
+          :producers="producers"
+        />
+
+        <PeerView
+          v-for="peer in Object.values(peers)"
+          :key="peer.id"
+          :peer="peer"
+        />
+      </q-page>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script >
 import protooClient from "protoo-client";
 import * as mediasoupClient from "mediasoup-client";
 import VideoContainer from "../components/VideoContainer";
+import PeerView from "../components/PeerView";
+import { evaMenuOutline } from "@quasar/extras/eva-icons";
 
 const VIDEO_CONSTRAINS = {
   qvga: { width: { ideal: 320 }, height: { ideal: 240 } },
@@ -38,10 +75,12 @@ const VIDEO_SVC_ENCODINGS = [{ scalabilityMode: "S3T3", dtx: true }];
 export default {
   name: "App",
   components: {
-    VideoContainer
+    VideoContainer,
+    PeerView
   },
   data() {
     return {
+      leftDrawerOpen: false,
       consume: true,
       produce: true,
       useDataChannel: false,
@@ -55,7 +94,8 @@ export default {
       shareProducer: null,
       webcamProducer: null,
       sendTransport: null,
-      micProducer: null
+      micProducer: null,
+      audioOnly: false
     };
   },
   created() {
@@ -74,6 +114,22 @@ export default {
     this.peer.on("failed", () => {
       console.error("WebSocket connection failed");
     });
+
+    this.evaMenuOutline = evaMenuOutline;
+  },
+  watch: {
+    peers: {
+      deep: true,
+      handler(v) {
+        console.log(v);
+      }
+    },
+    consumers: {
+      deep: true,
+      handler(v) {
+        console.log(v);
+      }
+    }
   },
   methods: {
     async enableShare() {
@@ -97,7 +153,7 @@ export default {
 
       this.shareProducer = await this.sendTransport.produce({ track });
 
-      this.producers.push({
+      this.$set(this.producers, this.shareProducer.id, {
         id: this.shareProducer.id,
         type: "share",
         paused: this.shareProducer.paused,
@@ -105,16 +161,6 @@ export default {
         rtpParameters: this.shareProducer.rtpParameters,
         codec: this.shareProducer.rtpParameters.codecs[0].mimeType.split("/")[1]
       });
-
-      /*
-
-      const videoStream = new MediaStream();
-
-      videoStream.addTrack(track);
-
-      this.videoStream = videoStream;
-
-      */
 
       this.shareProducer.on("transportclose", () => {
         this.shareProducer = null;
@@ -126,6 +172,8 @@ export default {
     },
     async disableShare() {
       this.shareProducer.close();
+
+      this.$delete(this.producers, this.shareProducer.id);
 
       try {
         await this.peer.request("closeProducer", {
@@ -140,7 +188,7 @@ export default {
 
       this.shareProducer = null;
     },
-    async handleRequest(request) {
+    async handleRequest(request, accept, reject) {
       switch (request.method) {
         case "newConsumer":
           {
@@ -194,7 +242,9 @@ export default {
                 consumer.rtpParameters.encodings[0].scalabilityMode
               );
 
-              this.$set(this.consumers, peerId, {
+              const peer = this.peers[peerId];
+
+              peer.consumers.push({
                 id: consumer.id,
                 type: type,
                 locallyPaused: false,
@@ -208,16 +258,15 @@ export default {
                 codec: consumer.rtpParameters.codecs[0].mimeType.split("/")[1],
                 track: consumer.track
               });
-
               // We are ready. Answer the protoo request so the server will
               // resume this Consumer (which was paused for now if video).
               accept();
 
               // If audio-only mode is enabled, pause it.
-              if (consumer.kind === "video" && store.getState().me.audioOnly)
+              if (consumer.kind === "video" && this.audioOnly)
                 this.pauseConsumer(consumer);
             } catch (error) {
-              logger.error('"newConsumer" request failed:%o', error);
+              console.error('"newConsumer" request failed:%o', error);
 
               this.$q.notify({
                 type: "error",
@@ -535,6 +584,14 @@ export default {
             : undefined
       });
 
+      for (const peer of peers) {
+        this.$set(this.peers, peer.id, {
+          ...peer,
+          consumers: [],
+          dataConsumers: []
+        });
+      }
+
       this.connected = true;
     },
     async setMaxSendingSpatialLayer(spatialLayer) {
@@ -699,7 +756,7 @@ export default {
     },
 
     async getVideoLocalStats() {
-      logger.debug("getVideoLocalStats()");
+      console.debug("getVideoLocalStats()");
 
       const producer = this.webcamProducer || this.shareProducer;
 
@@ -790,7 +847,7 @@ export default {
 
         consumer.locallyPaused = true;
       } catch (error) {
-        logger.error("_resumeConsumer() | failed:%o", error);
+        console.error("_resumeConsumer() | failed:%o", error);
 
         store.dispatch(
           requestActions.notify({

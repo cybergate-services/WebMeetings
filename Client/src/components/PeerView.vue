@@ -1,6 +1,6 @@
 <template>
   <q-card class="bg-primary video-container">
-    <video ref="video" class="fit" muted autoplay v-if="videoStream" />
+    <video ref="video" class="fit" muted autoplay v-if="videoStream" controls />
 
     <div class="column absolute-right no-wrap q-pr-sm full-height controls justify-center">
       <q-btn :icon="evaMicOutline" round color="pink" class="q-mb-sm">
@@ -20,33 +20,6 @@
           transition-hide="scale"
           content-class="text-primary bg-accent"
         >Iniciar vídeo</q-tooltip>
-      </q-btn>
-
-      <q-btn
-        :icon="evaDownloadOutline"
-        v-if="sharingScreen"
-        round
-        color="accent"
-        text-color="primary"
-        @click="$emit('disableShare')"
-      >
-        <q-tooltip
-          anchor="center left"
-          self="center right"
-          transition-show="scale"
-          transition-hide="scale"
-          content-class="text-primary bg-accent"
-        >Cancelar compartilhamento de tela</q-tooltip>
-      </q-btn>
-
-      <q-btn v-else :icon="evaUploadOutline" round color="pink" @click="$emit('enableShare')">
-        <q-tooltip
-          anchor="center left"
-          self="center right"
-          transition-show="scale"
-          transition-hide="scale"
-          content-class="text-primary bg-accent"
-        >Compartilhar tela</q-tooltip>
       </q-btn>
     </div>
 
@@ -104,14 +77,13 @@ import {
 } from "@quasar/extras/eva-icons";
 
 export default {
-  name: "VideoContainer",
+  name: "PeerView",
   props: {
-    producers: Object,
-    sharingScreen: Boolean
+    peer: Object
   },
   data() {
     return {
-      volume: 50
+      volume: 0
     };
   },
   watch: {
@@ -119,14 +91,16 @@ export default {
       this.$nextTick(() => {
         if (val) {
           this.$refs.video.srcObject = val;
+          debugger;
+          
         }
       });
     }
   },
   computed: {
     videoStream() {
-      const videoProducer = Object.values(this.producers).find(
-        producer => producer.type === "share"
+      const videoProducer = this.peer.consumers.find(
+        consumer => consumer.type === "simple"
       );
 
       if (videoProducer) {
