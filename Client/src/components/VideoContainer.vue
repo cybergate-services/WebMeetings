@@ -1,6 +1,6 @@
 <template>
   <q-card class="bg-primary video-container">
-    <video ref="video" class="fit" muted autoplay/>
+    <video ref="video" class="fit" muted autoplay />
 
     <div class="column absolute-right no-wrap q-pr-sm full-height controls justify-center">
       <q-btn :icon="evaMicOutline" round color="pink" class="q-mb-sm">
@@ -21,7 +21,18 @@
           content-class="text-primary bg-accent"
         >Iniciar vídeo</q-tooltip>
       </q-btn>
-      <q-btn :icon="evaMonitorOutline" round color="pink" @click="$emit('share-screen')">
+
+      <q-btn :icon="evaDownloadOutline" v-if="sharingScreen" round color="accent" text-color="primary" @click="$emit('disableShare')">
+        <q-tooltip
+          anchor="center left"
+          self="center right"
+          transition-show="scale"
+          transition-hide="scale"
+          content-class="text-primary bg-accent"
+        >Cancelar compartilhamento de tela</q-tooltip>
+      </q-btn>
+
+      <q-btn v-else :icon="evaUploadOutline" round color="pink" @click="$emit('enableShare')">
         <q-tooltip
           anchor="center left"
           self="center right"
@@ -81,15 +92,17 @@ import {
   evaMicOffOutline,
   evaVideoOffOutline,
   evaVideoOutline,
-  evaMonitorOutline
+  evaUploadOutline,
+  evaDownloadOutline
 } from "@quasar/extras/eva-icons";
 export default {
   name: "VideoContainer",
   props: {
-    videoStream: Object
+    videoStream: Object,
+    sharingScreen: Boolean
   },
   watch: {
-    videoStream(val){
+    videoStream(val) {
       this.$refs.video.srcObject = val;
     }
   },
@@ -106,7 +119,8 @@ export default {
     this.evaMicOffOutline = evaMicOffOutline;
     this.evaVideoOutline = evaVideoOutline;
     this.evaVideoOffOutline = evaVideoOffOutline;
-    this.evaMonitorOutline = evaMonitorOutline;
+    this.evaUploadOutline = evaUploadOutline;
+    this.evaDownloadOutline = evaDownloadOutline;
   }
 };
 </script>

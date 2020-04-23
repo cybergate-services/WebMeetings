@@ -119,7 +119,7 @@ class Room extends protooServer.Room {
 
         // This should not happen.
         if (!transport) {
-            console.warn('_createConsumer() | Transport for consuming not found');
+            console.warn('createConsumer() | Transport for consuming not found');
 
             return;
         }
@@ -136,7 +136,7 @@ class Room extends protooServer.Room {
                 });
         }
         catch (error) {
-            console.warn('_createConsumer() | transport.consume():%o', error);
+            console.warn('createConsumer() | transport.consume():%o', error);
 
             return;
         }
@@ -280,6 +280,17 @@ class Room extends protooServer.Room {
                                     producer
                                 });
                         }
+                    }
+
+                    for (const otherPeer of this.getJoinedPeers(otherPeer => otherPeer != peer)) {
+                        otherPeer.notify(
+                            'newPeer',
+                            {
+                                id: peer.id,
+                                displayName: peer.data.displayName,
+                                device: peer.data.device
+                            })
+                            .catch(() => { });
                     }
                 }
                 break;
