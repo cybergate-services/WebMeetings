@@ -123,20 +123,6 @@ export default {
 
     this.evaMenuOutline = evaMenuOutline;
   },
-  watch: {
-    peers: {
-      deep: true,
-      handler(v) {
-        console.log(v);
-      }
-    },
-    consumers: {
-      deep: true,
-      handler(v) {
-        console.log(v);
-      }
-    }
-  },
   methods: {
     getWebcamType(device) {
       if (/(back|rear)/i.test(device.label)) {
@@ -256,10 +242,35 @@ export default {
 
       this.webcamInProgress = false;
     },
-    async disableWebcam() {},
+    async disableWebcam() {
+      console.debug("disableWebcam()");
+
+      if (!this.webcamProducer) return;
+
+      this.webcamProducer.close();
+
+      this.$delete(this.producers, this.webcamProducer.id);
+
+      try {
+        await this.peer.request("closeProducer", {
+          producerId: this.webcamProducer.id
+        });
+      } catch (error) {
+        this.$q.notify({
+          color: "negative",
+          message: `Error closing server-side webcam Producer: ${error}`
+        });
+      }
+
+      this.webcamProducer = null;
+    },
     async enableShare() {
       if (!this.mediasoupDevice.canProduce("video")) {
         return;
+      }
+
+      if (this.webcamProducer) {
+        await this.disableWebcam();
       }
 
       const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -302,8 +313,6 @@ export default {
     },
     async disableShare() {
       if (!this.shareProducer) return;
-
-      this.shareProducer.track.stop();
 
       this.shareProducer.close();
 

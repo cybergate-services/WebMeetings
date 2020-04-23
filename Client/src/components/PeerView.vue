@@ -1,6 +1,6 @@
 <template>
   <q-card class="bg-primary video-container">
-    <video ref="video" class="fit" muted autoplay v-if="videoStream" controls />
+    <video ref="video" class="fit" muted autoplay v-if="videoStream" />
 
     <div class="column absolute-right no-wrap q-pr-sm full-height controls justify-center">
       <q-btn :icon="evaMicOutline" round color="pink" class="q-mb-sm">
