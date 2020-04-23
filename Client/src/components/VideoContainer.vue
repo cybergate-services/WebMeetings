@@ -146,7 +146,7 @@ export default {
   computed: {
     videoStream() {
       const videoProducer = Object.values(this.producers).find(
-        producer => producer.type === "video" || producer.type === "back" || producer.type === "front"
+        producer => producer.type === "share" || producer.type === "back" || producer.type === "front"
       );
 
       if (videoProducer) {
