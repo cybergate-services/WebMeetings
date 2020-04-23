@@ -354,6 +354,8 @@ class Room extends protooServer.Room {
                     }
                     catch (ex) {
                         console.error(ex);
+
+                        throw ex;
                     }
                 }
                 break;
@@ -387,75 +389,83 @@ class Room extends protooServer.Room {
 
             case 'produce':
                 {
-                    // Ensure the Peer is joined.
-                    if (!peer.data.joined)
-                        throw new Error('Peer not yet joined');
 
-                    const { transportId, kind, rtpParameters } = request.data;
-                    let { appData } = request.data;
-                    const transport = peer.data.transports.get(transportId);
+                    try {
+                        // Ensure the Peer is joined.
+                        if (!peer.data.joined)
+                            throw new Error('Peer not yet joined');
 
-                    if (!transport)
-                        throw new Error(`transport with id "${transportId}" not found`);
+                        const { transportId, kind, rtpParameters } = request.data;
+                        let { appData } = request.data;
+                        const transport = peer.data.transports.get(transportId);
 
-                    // Add peerId into appData to later get the associated Peer during
-                    // the 'loudest' event of the audioLevelObserver.
-                    appData = { ...appData, peerId: peer.id };
+                        if (!transport)
+                            throw new Error(`transport with id "${transportId}" not found`);
 
-                    const producer = await transport.produce(
-                        {
-                            kind,
-                            rtpParameters,
-                            appData
-                            // keyFrameRequestDelay: 5000
+                        // Add peerId into appData to later get the associated Peer during
+                        // the 'loudest' event of the audioLevelObserver.
+                        appData = { ...appData, peerId: peer.id };
+
+                        const producer = await transport.produce(
+                            {
+                                kind,
+                                rtpParameters,
+                                appData
+                                // keyFrameRequestDelay: 5000
+                            });
+
+                        // Store the Producer into the protoo Peer data Object.
+                        peer.data.producers.set(producer.id, producer);
+
+                        // Set Producer events.
+                        producer.on('score', (score) => {
+                            // console.debug(
+                            // 	'producer "score" event [producerId:%s, score:%o]',
+                            // 	producer.id, score);
+
+                            peer.notify('producerScore', { producerId: producer.id, score })
+                                .catch(() => { });
                         });
 
-                    // Store the Producer into the protoo Peer data Object.
-                    peer.data.producers.set(producer.id, producer);
+                        producer.on('videoorientationchange', (videoOrientation) => {
+                            console.debug(
+                                'producer "videoorientationchange" event [producerId:%s, videoOrientation:%o]',
+                                producer.id, videoOrientation);
+                        });
 
-                    // Set Producer events.
-                    producer.on('score', (score) => {
-                        // console.debug(
-                        // 	'producer "score" event [producerId:%s, score:%o]',
-                        // 	producer.id, score);
+                        // NOTE: For testing.
+                        // await producer.enableTraceEvent([ 'rtp', 'keyframe', 'nack', 'pli', 'fir' ]);
+                        // await producer.enableTraceEvent([ 'pli', 'fir' ]);
+                        // await producer.enableTraceEvent([ 'keyframe' ]);
 
-                        peer.notify('producerScore', { producerId: producer.id, score })
-                            .catch(() => { });
-                    });
+                        producer.on('trace', (trace) => {
+                            console.info(
+                                'producer "trace" event [producerId:%s, trace.type:%s, trace:%o]',
+                                producer.id, trace.type, trace);
+                        });
 
-                    producer.on('videoorientationchange', (videoOrientation) => {
-                        console.debug(
-                            'producer "videoorientationchange" event [producerId:%s, videoOrientation:%o]',
-                            producer.id, videoOrientation);
-                    });
+                        accept({ id: producer.id });
 
-                    // NOTE: For testing.
-                    // await producer.enableTraceEvent([ 'rtp', 'keyframe', 'nack', 'pli', 'fir' ]);
-                    // await producer.enableTraceEvent([ 'pli', 'fir' ]);
-                    // await producer.enableTraceEvent([ 'keyframe' ]);
+                        // Optimization: Create a server-side Consumer for each Peer.
+                        for (const otherPeer of this.getJoinedPeers(joinedPeer => joinedPeer !== peer)) {
+                            this.createConsumer(
+                                {
+                                    consumerPeer: otherPeer,
+                                    producerPeer: peer,
+                                    producer
+                                });
+                        }
 
-                    producer.on('trace', (trace) => {
-                        console.info(
-                            'producer "trace" event [producerId:%s, trace.type:%s, trace:%o]',
-                            producer.id, trace.type, trace);
-                    });
-
-                    accept({ id: producer.id });
-
-                    // Optimization: Create a server-side Consumer for each Peer.
-                    for (const otherPeer of this.getJoinedPeers(joinedPeer => joinedPeer !== peer)) {
-                        this.createConsumer(
-                            {
-                                consumerPeer: otherPeer,
-                                producerPeer: peer,
-                                producer
-                            });
+                        // Add into the audioLevelObserver.
+                        if (producer.kind === 'audio') {
+                            this.audioLevelObserver.addProducer({ producerId: producer.id })
+                                .catch(() => { });
+                        }
                     }
+                    catch (ex) {
+                        console.error(ex);
 
-                    // Add into the audioLevelObserver.
-                    if (producer.kind === 'audio') {
-                        this.audioLevelObserver.addProducer({ producerId: producer.id })
-                            .catch(() => { });
+                        throw ex;
                     }
                 }
 
