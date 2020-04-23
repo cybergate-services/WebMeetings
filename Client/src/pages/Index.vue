@@ -85,7 +85,8 @@ export default {
       useDataChannel: false,
       videoStream: null,
       connected: false,
-      displayName: "Diego",
+      displayName: null,
+      role: null,
       producers: {},
       consumers: {},
       peers: {},
@@ -714,8 +715,8 @@ export default {
         );
       }
 
-      const { peers } = await this.peer.request("join", {
-        displayName: this.displayName,
+      const { peers, displayName, role } = await this.peer.request("join", {
+        token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjY2NmYWNpbC5jb20uYnIiLCJpYXQiOjE1ODc2NzgxMDYsImV4cCI6MTYxOTIxNDEwMiwiYXVkIjoiY2NjZmFjaWwuY29tLmJyIiwic3ViIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4ifQ.wNG4hQBTDHgILiIn9Ypx4wqMDP4M8y1xbvd1EyniFnQ",
         device: this.device,
         rtpCapabilities: this.consume
           ? this.mediasoupDevice.rtpCapabilities
@@ -733,6 +734,9 @@ export default {
           dataConsumers: []
         });
       }
+
+      this.displayName = displayName;
+      this.role = role;
 
       this.connected = true;
     },

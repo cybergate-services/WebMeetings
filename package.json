@@ -10,8 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "cuid": "^2.1.8",
+    "jsonwebtoken": "^8.5.1",
+    "mediasoup": "^3.5.8",
     "protoo-server": "^4.0.3",
-    "winston": "^3.2.1",
-    "mediasoup": "^3.5.8"
+    "winston": "^3.2.1"
   }
 }

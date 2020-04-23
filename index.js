@@ -63,7 +63,6 @@ async function runServer() {
             console.log('peer created %s', peer.id);
 
             rooms.get("default").handleConnection(peer);
-
         }
         catch (ex) {
             console.error(ex);

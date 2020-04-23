@@ -1,5 +1,6 @@
 const protooServer = require('protoo-server');
 const config = require("./config");
+const jwt = require("jsonwebtoken");
 
 class Room extends protooServer.Room {
     static async create(mediasoupWorker) {
@@ -243,18 +244,27 @@ class Room extends protooServer.Room {
                     if (peer.data.joined)
                         throw new Error('Peer already joined');
 
-
                     const {
-                        displayName,
+                        token,
                         device,
                         rtpCapabilities,
                         sctpCapabilities
                     } = request.data;
 
 
+                    const user = await new Promise((resolve, reject) => {
+                        jwt.verify(token, 'qwertyuiopasdfghjklzxcvbnm123456', { issuer: "cccfacil.com.br", audience: "cccfacil.com.br" }, function (err, decoded) {
+                            if (err)
+                                reject(err);
+                            else
+                                resolve(decoded);
+                        });
+                    });
+
                     // Store client data into the protoo Peer data object.
                     peer.data.joined = true;
-                    peer.data.displayName = displayName;
+                    peer.data.displayName = user.sub;
+                    peer.data.role = user.role;
                     peer.data.device = device;
                     peer.data.rtpCapabilities = rtpCapabilities;
                     peer.data.sctpCapabilities = sctpCapabilities;
@@ -263,10 +273,11 @@ class Room extends protooServer.Room {
                         .map((joinedPeer) => ({
                             id: joinedPeer.id,
                             displayName: joinedPeer.data.displayName,
+                            role: joinedPeer.data.role,
                             device: joinedPeer.data.device
                         }));
 
-                    accept({ peers: peerInfos });
+                    accept({ peers: peerInfos, displayName: peer.data.displayName, role: peer.data.role });
 
                     peer.data.joined = true;
 
@@ -288,6 +299,7 @@ class Room extends protooServer.Room {
                             {
                                 id: peer.id,
                                 displayName: peer.data.displayName,
+                                role: peer.data.role,
                                 device: peer.data.device
                             })
                             .catch(() => { });
