@@ -286,69 +286,74 @@ class Room extends protooServer.Room {
                 break;
             case "createWebRtcTransport":
                 {
-                    // NOTE: Don't require that the Peer is joined here, so the client can
-                    // initiate mediasoup Transports and be ready when he later joins.
+                    try {
+                        // NOTE: Don't require that the Peer is joined here, so the client can
+                        // initiate mediasoup Transports and be ready when he later joins.
 
-                    const {
-                        forceTcp,
-                        producing,
-                        consuming,
-                        sctpCapabilities
-                    } = request.data;
+                        const {
+                            forceTcp,
+                            producing,
+                            consuming,
+                            sctpCapabilities
+                        } = request.data;
 
-                    const webRtcTransportOptions =
-                    {
-                        ...config.mediasoup.webRtcTransportOptions,
-                        enableSctp: Boolean(sctpCapabilities),
-                        numSctpStreams: (sctpCapabilities || {}).numStreams,
-                        appData: { producing, consuming }
-                    };
-
-                    if (forceTcp) {
-                        webRtcTransportOptions.enableUdp = false;
-                        webRtcTransportOptions.enableTcp = true;
-                    }
-
-                    const transport = await this.mediasoupRouter.createWebRtcTransport(
-                        webRtcTransportOptions);
-
-                    transport.on('sctpstatechange', (sctpState) => {
-                        console.debug('WebRtcTransport "sctpstatechange" event [sctpState:%s]', sctpState);
-                    });
-
-                    transport.on('dtlsstatechange', (dtlsState) => {
-                        if (dtlsState === 'failed' || dtlsState === 'closed')
-                            console.warn('WebRtcTransport "dtlsstatechange" event [dtlsState:%s]', dtlsState);
-                    });
-
-                    // NOTE: For testing.
-                    // await transport.enableTraceEvent([ 'probation', 'bwe' ]);
-                    // await transport.enableTraceEvent([ 'bwe' ]);
-
-                    transport.on('trace', (trace) => {
-                        console.info(
-                            'transport "trace" event [transportId:%s, trace.type:%s, trace:%o]',
-                            transport.id, trace.type, trace);
-                    });
-
-                    // Store the WebRtcTransport into the protoo Peer data Object.
-                    peer.data.transports.set(transport.id, transport);
-
-                    accept(
+                        const webRtcTransportOptions =
                         {
-                            id: transport.id,
-                            iceParameters: transport.iceParameters,
-                            iceCandidates: transport.iceCandidates,
-                            dtlsParameters: transport.dtlsParameters,
-                            sctpParameters: transport.sctpParameters
+                            ...config.mediasoup.webRtcTransportOptions,
+                            enableSctp: Boolean(sctpCapabilities),
+                            numSctpStreams: (sctpCapabilities || {}).numStreams,
+                            appData: { producing, consuming }
+                        };
+
+                        if (forceTcp) {
+                            webRtcTransportOptions.enableUdp = false;
+                            webRtcTransportOptions.enableTcp = true;
+                        }
+
+                        const transport = await this.mediasoupRouter.createWebRtcTransport(
+                            webRtcTransportOptions);
+
+                        transport.on('sctpstatechange', (sctpState) => {
+                            console.debug('WebRtcTransport "sctpstatechange" event [sctpState:%s]', sctpState);
                         });
 
-                    const { maxIncomingBitrate } = config.mediasoup.webRtcTransportOptions;
+                        transport.on('dtlsstatechange', (dtlsState) => {
+                            if (dtlsState === 'failed' || dtlsState === 'closed')
+                                console.warn('WebRtcTransport "dtlsstatechange" event [dtlsState:%s]', dtlsState);
+                        });
 
-                    // If set, apply max incoming bitrate limit.
-                    if (maxIncomingBitrate) {
-                        try { await transport.setMaxIncomingBitrate(maxIncomingBitrate); }
-                        catch (error) { }
+                        // NOTE: For testing.
+                        // await transport.enableTraceEvent([ 'probation', 'bwe' ]);
+                        // await transport.enableTraceEvent([ 'bwe' ]);
+
+                        transport.on('trace', (trace) => {
+                            console.info(
+                                'transport "trace" event [transportId:%s, trace.type:%s, trace:%o]',
+                                transport.id, trace.type, trace);
+                        });
+
+                        // Store the WebRtcTransport into the protoo Peer data Object.
+                        peer.data.transports.set(transport.id, transport);
+
+                        accept(
+                            {
+                                id: transport.id,
+                                iceParameters: transport.iceParameters,
+                                iceCandidates: transport.iceCandidates,
+                                dtlsParameters: transport.dtlsParameters,
+                                sctpParameters: transport.sctpParameters
+                            });
+
+                        const { maxIncomingBitrate } = config.mediasoup.webRtcTransportOptions;
+
+                        // If set, apply max incoming bitrate limit.
+                        if (maxIncomingBitrate) {
+                            try { await transport.setMaxIncomingBitrate(maxIncomingBitrate); }
+                            catch (error) { }
+                        }
+                    }
+                    catch (ex) {
+                        console.error(ex);
                     }
                 }
                 break;
@@ -710,9 +715,9 @@ class Room extends protooServer.Room {
 
                     break;
                 }
-                default:
-                    console.error('unkown method %s', request.method);
-                    break;
+            default:
+                console.error('unkown method %s', request.method);
+                break;
 
         }
     }
