@@ -1,6 +1,6 @@
 <template>
   <q-card class="bg-primary video-container">
-    <video ref="video" class="fit" />
+    <video ref="video" class="fit" muted autoplay/>
 
     <div class="column absolute-right no-wrap q-pr-sm full-height controls justify-center">
       <q-btn :icon="evaMicOutline" round color="pink" class="q-mb-sm">
@@ -85,6 +85,14 @@ import {
 } from "@quasar/extras/eva-icons";
 export default {
   name: "VideoContainer",
+  props: {
+    videoStream: Object
+  },
+  watch: {
+    videoStream(val){
+      this.$refs.video.srcObject = val;
+    }
+  },
   data() {
     return {
       volume: 50

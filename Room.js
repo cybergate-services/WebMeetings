@@ -31,7 +31,6 @@ class Room extends protooServer.Room {
         super.close();
 
         this.mediasoupRouter.close();
-
     }
 
     getJoinedPeers(predicate = peer => true) {
@@ -79,7 +78,7 @@ class Room extends protooServer.Room {
             // If this is the latest Peer in the room, close the room.
             if (this.peers.length === 0) {
 
-                this.close();
+                //this.close();
             }
         });
     }
@@ -291,7 +290,6 @@ class Room extends protooServer.Room {
                         // initiate mediasoup Transports and be ready when he later joins.
 
                         const {
-                            forceTcp,
                             producing,
                             consuming,
                             sctpCapabilities
@@ -305,10 +303,9 @@ class Room extends protooServer.Room {
                             appData: { producing, consuming }
                         };
 
-                        if (forceTcp) {
-                            webRtcTransportOptions.enableUdp = false;
-                            webRtcTransportOptions.enableTcp = true;
-                        }
+                        webRtcTransportOptions.enableUdp = true;
+                        webRtcTransportOptions.enableTcp = true;
+
 
                         const transport = await this.mediasoupRouter.createWebRtcTransport(
                             webRtcTransportOptions);

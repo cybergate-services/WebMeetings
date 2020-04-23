@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center">
-    <VideoContainer @share-screen="enableShare" />
+    <VideoContainer @share-screen="enableShare" :videoStream="videoStream" />
   </q-page>
 </template>
 
@@ -39,6 +39,11 @@ export default {
   data() {
     return {
       consume: true,
+      produce: true,
+      useDataChannel: false,
+      videoStream: null,
+      connected: false,
+      displayName: "Diego",
       producers: [],
       shareProducer: null,
       sendTransport: null
@@ -89,6 +94,12 @@ export default {
         rtpParameters: this.shareProducer.rtpParameters,
         codec: this.shareProducer.rtpParameters.codecs[0].mimeType.split("/")[1]
       });
+
+      const videoStream = new MediaStream();
+
+      videoStream.addTrack(track);
+
+      this.videoStream = videoStream;
 
       this.shareProducer.on("transportclose", () => {
         this.shareProducer = null;
@@ -209,92 +220,152 @@ export default {
 
       await this.mediasoupDevice.load({ routerRtpCapabilities });
 
-      const transportInfo = await this.peer.request("createWebRtcTransport", {
-        forceTcp: false,
-        producing: true,
-        consuming: false,
-        sctpCapabilities: false
-          ? this._mediasoupDevice.sctpCapabilities
-          : undefined
+      if (this.produce) {
+        const transportInfo = await this.peer.request("createWebRtcTransport", {
+          producing: true,
+          consuming: false,
+          sctpCapabilities: this.useDataChannel
+            ? this.mediasoupDevice.sctpCapabilities
+            : undefined
+        });
+
+        const {
+          id,
+          iceParameters,
+          iceCandidates,
+          dtlsParameters,
+          sctpParameters
+        } = transportInfo;
+
+        this.sendTransport = this.mediasoupDevice.createSendTransport({
+          id,
+          iceParameters,
+          iceCandidates,
+          dtlsParameters,
+          sctpParameters,
+          iceServers: [],
+          proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS
+        });
+
+        this.sendTransport.on(
+          "connect",
+          (
+            { dtlsParameters },
+            callback,
+            errback // eslint-disable-line no-shadow
+          ) => {
+            this.peer
+              .request("connectWebRtcTransport", {
+                transportId: this.sendTransport.id,
+                dtlsParameters
+              })
+              .then(callback)
+              .catch(errback);
+          }
+        );
+
+        this.sendTransport.on(
+          "produce",
+          async ({ kind, rtpParameters, appData }, callback, errback) => {
+            try {
+              // eslint-disable-next-line no-shadow
+              const { id } = await this.peer.request("produce", {
+                transportId: this.sendTransport.id,
+                kind,
+                rtpParameters,
+                appData
+              });
+
+              callback({ id });
+            } catch (error) {
+              errback(error);
+            }
+          }
+        );
+
+        this.sendTransport.on(
+          "producedata",
+          async (
+            { sctpStreamParameters, label, protocol, appData },
+            callback,
+            errback
+          ) => {
+            try {
+              // eslint-disable-next-line no-shadow
+              const { id } = await this.peer.request("produceData", {
+                transportId: this._sendTransport.id,
+                sctpStreamParameters,
+                label,
+                protocol,
+                appData
+              });
+
+              callback({ id });
+            } catch (error) {
+              errback(error);
+            }
+          }
+        );
+      }
+
+      if (this.consume) {
+        const transportInfo = await this.peer.request("createWebRtcTransport", {
+          forceTcp: false,
+          producing: false,
+          consuming: true,
+          sctpCapabilities: this.useDataChannel
+            ? this.mediasoupDevice.sctpCapabilities
+            : undefined
+        });
+
+        const {
+          id,
+          iceParameters,
+          iceCandidates,
+          dtlsParameters,
+          sctpParameters
+        } = transportInfo;
+
+        this.recvTransport = this.mediasoupDevice.createRecvTransport({
+          id,
+          iceParameters,
+          iceCandidates,
+          dtlsParameters,
+          sctpParameters,
+          iceServers: []
+        });
+
+        this.recvTransport.on(
+          "connect",
+          (
+            { dtlsParameters },
+            callback,
+            errback // eslint-disable-line no-shadow
+          ) => {
+            this.peer
+              .request("connectWebRtcTransport", {
+                transportId: this.recvTransport.id,
+                dtlsParameters
+              })
+              .then(callback)
+              .catch(errback);
+          }
+        );
+      }
+
+      const { peers } = await this.peer.request("join", {
+        displayName: this.displayName,
+        device: this.device,
+        rtpCapabilities: this.consume
+          ? this.mediasoupDevice.rtpCapabilities
+          : undefined,
+        sctpCapabilities:
+          this.useDataChannel && this.consume
+            ? this._mediasoupDevice.sctpCapabilities
+            : undefined
       });
 
-      const {
-        id,
-        iceParameters,
-        iceCandidates,
-        dtlsParameters,
-        sctpParameters
-      } = transportInfo;
-
-      this.sendTransport = this.mediasoupDevice.createSendTransport({
-        id,
-        iceParameters,
-        iceCandidates,
-        dtlsParameters,
-        sctpParameters,
-        iceServers: [],
-        proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS
-      });
-
-      this.sendTransport.on(
-        "connect",
-        (
-          { dtlsParameters },
-          callback,
-          errback // eslint-disable-line no-shadow
-        ) => {
-          this.peer
-            .request("connectWebRtcTransport", {
-              transportId: this.sendTransport.id,
-              dtlsParameters
-            })
-            .then(callback)
-            .catch(errback);
-        }
-      );
-
-      this.sendTransport.on(
-        "produce",
-        async ({ kind, rtpParameters, appData }, callback, errback) => {
-          try {
-            // eslint-disable-next-line no-shadow
-            const { id } = await this.peer.request("produce", {
-              transportId: this.sendTransport.id,
-              kind,
-              rtpParameters,
-              appData
-            });
-
-            callback({ id });
-          } catch (error) {
-            errback(error);
-          }
-        }
-      );
-
-      this.sendTransport.on(
-        "producedata",
-        async (
-          { sctpStreamParameters, label, protocol, appData },
-          callback,
-          errback
-        ) => {
-          try {
-            // eslint-disable-next-line no-shadow
-            const { id } = await this.peer.request("produceData", {
-              transportId: this._sendTransport.id,
-              sctpStreamParameters,
-              label,
-              protocol,
-              appData
-            });
-
-            callback({ id });
-          } catch (error) {
-            errback(error);
-          }
-        }
-      );
+      this.connected = true;
     }
   }
 };
