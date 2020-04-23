@@ -29,7 +29,10 @@
         <VideoContainer
           @enableShare="enableShare"
           @disableShare="disableShare"
+          @enableVideo="enableWebcam"
+          @disableVideo="disableWebcam"
           :sharingScreen="shareProducer != null"
+          :sharingVideo="webcamProducer != null"
           :producers="producers"
         />
 
@@ -91,12 +94,19 @@ export default {
       webcamProducer: null,
       sendTransport: null,
       micProducer: null,
-      audioOnly: false
+      webcamInProgress: true,
+      audioOnly: false,
+      useSimulcast: false,
+      canChangeWebcam: false,
+      webcam: {
+        device: null,
+        resolution: "hd"
+      }
     };
   },
   created() {
     const protooTransport = new protooClient.WebSocketTransport(
-      "wss://23.236.49.182:8080/socket"
+      `wss://${window.location.hostname}:8080/socket`
     );
 
     this.peer = new protooClient.Peer(protooTransport);
@@ -128,6 +138,114 @@ export default {
     }
   },
   methods: {
+    async enableWebcam() {
+      console.debug("enableWebcam()");
+
+      if (this.webcamProducer) return;
+      else if (this.shareProducer) await this.disableShare();
+
+      if (!this.mediasoupDevice.canProduce("video")) {
+        console.error("enableWebcam() | cannot produce video");
+
+        return;
+      }
+
+      let track;
+      let device;
+
+      this.webcamInProgress = true;
+
+      try {
+        if (!this.externalVideo) {
+          await this.updateWebcams();
+          device = this.webcam.device;
+
+          const { resolution } = this.webcam;
+
+          if (!device) throw new Error("no webcam devices");
+
+          console.debug("enableWebcam() | calling getUserMedia()");
+
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              deviceId: { exact: device.deviceId },
+              ...VIDEO_CONSTRAINS[resolution]
+            }
+          });
+
+          track = stream.getVideoTracks()[0];
+        } else {
+          device = { label: "external video" };
+
+          const stream = await this.getExternalVideoStream();
+
+          track = stream.getVideoTracks()[0].clone();
+        }
+
+        if (this.useSimulcast) {
+          // If VP9 is the only available video codec then use SVC.
+          const firstVideoCodec = this._mediasoupDevice.rtpCapabilities.codecs.find(
+            c => c.kind === "video"
+          );
+
+          let encodings;
+
+          if (firstVideoCodec.mimeType.toLowerCase() === "video/vp9")
+            encodings = VIDEO_KSVC_ENCODINGS;
+          else encodings = VIDEO_SIMULCAST_ENCODINGS;
+
+          this._webcamProducer = await this._sendTransport.produce({
+            track,
+            encodings,
+            codecOptions: {
+              videoGoogleStartBitrate: 1000
+            }
+            // NOTE: for testing codec selection.
+            // codec : this._mediasoupDevice.rtpCapabilities.codecs
+            // 	.find((codec) => codec.mimeType.toLowerCase() === 'video/h264')
+          });
+        } else {
+          this.webcamProducer = await this.sendTransport.produce({ track });
+        }
+
+        this.$set(this.producers, this.webcamProducer.id, {
+          id: this.webcamProducer.id,
+          deviceLabel: device.label,
+          type: this.getWebcamType(device),
+          paused: this.webcamProducer.paused,
+          track: this.webcamProducer.track,
+          rtpParameters: this.webcamProducer.rtpParameters,
+          codec: this.webcamProducer.rtpParameters.codecs[0].mimeType.split(
+            "/"
+          )[1]
+        });
+
+        this.webcamProducer.on("transportclose", () => {
+          this.webcamProducer = null;
+        });
+
+        this.webcamProducer.on("trackended", () => {
+          this.$q.notify({
+            color: "negative",
+            message: "Webcam disconnected!"
+          });
+
+          this.disableWebcam().catch(() => {});
+        });
+      } catch (error) {
+        console.error("enableWebcam() | failed:%o", error);
+
+        this.$q.notify({
+          color: "info",
+          message: `Error enabling webcam: ${error}`
+        });
+
+        if (track) track.stop();
+      }
+
+      this.webcamInProgress = false;
+    },
+    async disableWebcam() {},
     async enableShare() {
       if (!this.mediasoupDevice.canProduce("video")) {
         return;
@@ -153,7 +271,7 @@ export default {
           source: "screen"
         }
       });
-      
+
       this.$set(this.producers, this.shareProducer.id, {
         id: this.shareProducer.id,
         type: "share",
@@ -750,7 +868,6 @@ export default {
 
       return this.recvTransport.getStats();
     },
-
     async getAudioLocalStats() {
       console.debug("getAudioLocalStats()");
 
@@ -758,7 +875,6 @@ export default {
 
       return this.micProducer.getStats();
     },
-
     async getVideoLocalStats() {
       console.debug("getVideoLocalStats()");
 
@@ -768,7 +884,6 @@ export default {
 
       return producer.getStats();
     },
-
     async getConsumerLocalStats(consumerId) {
       const consumer = this.consumers[consumerId];
 
@@ -776,7 +891,6 @@ export default {
 
       return consumer.getStats();
     },
-
     async applyNetworkThrottle({ uplink, downlink, rtt, secret }) {
       console.debug(
         "applyNetworkThrottle() [uplink:%s, downlink:%s, rtt:%s]",
@@ -801,7 +915,6 @@ export default {
         });
       }
     },
-
     async resetNetworkThrottle({ silent = false, secret }) {
       console.debug("resetNetworkThrottle()");
 
@@ -838,7 +951,6 @@ export default {
         });
       }
     },
-
     async resumeConsumer(consumer) {
       if (!consumer.paused) return;
 
@@ -861,7 +973,6 @@ export default {
         );
       }
     },
-
     async getExternalVideoStream() {
       if (this.externalVideoStream) return this.externalVideoStream;
 
@@ -878,6 +989,36 @@ export default {
       else throw new Error("video.captureStream() not supported");
 
       return this.externalVideoStream;
+    },
+    async updateWebcams() {
+      console.debug("updateWebcams()");
+
+      // Reset the list.
+      this.webcams = new Map();
+
+      console.debug("updateWebcams() | calling enumerateDevices()");
+
+      const devices = await navigator.mediaDevices.enumerateDevices();
+
+      for (const device of devices) {
+        if (device.kind !== "videoinput") continue;
+
+        this.webcams.set(device.deviceId, device);
+      }
+
+      const array = Array.from(this.webcams.values());
+      const len = array.length;
+      const currentWebcamId = this.webcam.device
+        ? this.webcam.device.deviceId
+        : undefined;
+
+      console.debug("updateWebcams() [webcams:%o]", array);
+
+      if (len === 0) this.webcam.device = null;
+      else if (!this.webcams.has(currentWebcamId))
+        this.webcam.device = array[0];
+
+      this.canChangeWebcam = this.webcams.size > 1;
     }
   }
 };

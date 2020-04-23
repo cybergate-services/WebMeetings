@@ -12,14 +12,33 @@
           content-class="text-primary bg-accent"
         >Ativar áudio</q-tooltip>
       </q-btn>
-      <q-btn :icon="evaVideoOutline" round color="pink" class="q-mb-sm">
+
+      <q-btn
+        v-if="sharingVideo"
+        :icon="evaVideoOffOutline"
+        round
+        color="accent"
+        text-color="primary"
+        class="q-mb-sm"
+        @click="$emit('disableVideo')"
+      >
         <q-tooltip
           anchor="center left"
           self="center right"
           transition-show="scale"
           transition-hide="scale"
           content-class="text-primary bg-accent"
-        >Iniciar vídeo</q-tooltip>
+        >Cancelar compartilhamento de vídeo</q-tooltip>
+      </q-btn>
+
+      <q-btn v-else :icon="evaVideoOutline" round color="pink" class="q-mb-sm" @click="$emit('enableVideo')">
+        <q-tooltip
+          anchor="center left"
+          self="center right"
+          transition-show="scale"
+          transition-hide="scale"
+          content-class="text-primary bg-accent"
+        >Compartilhar vídeo</q-tooltip>
       </q-btn>
 
       <q-btn
@@ -107,7 +126,8 @@ export default {
   name: "VideoContainer",
   props: {
     producers: Object,
-    sharingScreen: Boolean
+    sharingScreen: Boolean,
+    sharingVideo: Boolean
   },
   data() {
     return {
