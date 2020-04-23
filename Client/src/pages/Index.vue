@@ -96,7 +96,7 @@ export default {
   },
   created() {
     const protooTransport = new protooClient.WebSocketTransport(
-      "wss://localhost:8080/socket"
+      "wss://23.236.49.182:8080/socket"
     );
 
     this.peer = new protooClient.Peer(protooTransport);
