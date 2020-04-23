@@ -33,11 +33,7 @@
           :producers="producers"
         />
 
-        <PeerView
-          v-for="peer in Object.values(peers)"
-          :key="peer.id"
-          :peer="peer"
-        />
+        <PeerView v-for="peer in Object.values(peers)" :key="peer.id" :peer="peer" />
       </q-page>
     </q-page-container>
   </q-layout>
@@ -143,16 +139,21 @@ export default {
           displaySurface: "monitor",
           logicalSurface: true,
           cursor: true,
-          width: { max: 1920 },
-          height: { max: 1080 },
+          width: { max: 1280 },
+          height: { max: 720 },
           frameRate: { max: 30 }
         }
       });
 
       let track = stream.getVideoTracks()[0];
 
-      this.shareProducer = await this.sendTransport.produce({ track });
-
+      this.shareProducer = await this.sendTransport.produce({
+        track,
+        appData: {
+          source: "screen"
+        }
+      });
+      
       this.$set(this.producers, this.shareProducer.id, {
         id: this.shareProducer.id,
         type: "share",
@@ -171,6 +172,10 @@ export default {
       });
     },
     async disableShare() {
+      if (!this.shareProducer) return;
+
+      this.shareProducer.track.stop();
+
       this.shareProducer.close();
 
       this.$delete(this.producers, this.shareProducer.id);
@@ -292,7 +297,8 @@ export default {
 
           const producer = this.producers[producerId];
 
-          producer.score = score;
+          if (producer) producer.score = score;
+
           break;
         }
 
@@ -348,20 +354,18 @@ export default {
 
           const { peerId } = consumer.appData;
 
-          function removeConsumer(consumerId, peerId) {
-            const peer = state[peerId];
+          const peer = this.peers[peerId];
 
-            // NOTE: This means that the Peer was closed before, so it's ok.
-            if (!peer) return state;
+          // NOTE: This means that the Peer was closed before, so it's ok.
+          if (!peer) break;
 
-            const idx = peer.consumers.indexOf(consumerId);
+          const idx = peer.consumers.findIndex(
+            consumer => consumer.id === consumerId
+          );
 
-            if (idx === -1) throw new Error("Consumer not found");
+          if (idx === -1) throw new Error("Consumer not found");
 
-            peer.consumers.splice(idx, 1);
-          }
-
-          removeConsumer(consumerId, peerId);
+          peer.consumers.splice(idx, 1);
 
           break;
         }
@@ -858,7 +862,7 @@ export default {
       }
     },
 
-    async _getExternalVideoStream() {
+    async getExternalVideoStream() {
       if (this.externalVideoStream) return this.externalVideoStream;
 
       if (this.externalVideo.readyState < 3) {

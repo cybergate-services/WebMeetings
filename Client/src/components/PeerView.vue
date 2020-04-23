@@ -91,8 +91,6 @@ export default {
       this.$nextTick(() => {
         if (val) {
           this.$refs.video.srcObject = val;
-          debugger;
-          
         }
       });
     }

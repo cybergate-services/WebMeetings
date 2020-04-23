@@ -381,7 +381,7 @@ class Room extends protooServer.Room {
                 }
                 break;
 
-            case 'restartIce':
+            case "restartIce":
                 {
                     const { transportId } = request.data;
                     const transport = peer.data.transports.get(transportId);
@@ -494,7 +494,7 @@ class Room extends protooServer.Room {
                     producer.close();
 
                     // Remove from its map.
-                    peer.data.producers.delete(producer.id);
+                    peer.data.producers.delete(producerId);
 
                     accept();
                 }
