@@ -147,6 +147,8 @@ import * as mediasoupClient from "mediasoup-client";
 import VideoContainer from "../components/VideoContainer";
 import PeerView from "../components/PeerView";
 
+import ErrorDialog from "../components/ErrorDialog";
+
 import {
   evaVolumeUpOutline,
   evaVolumeOffOutline,
@@ -229,35 +231,35 @@ export default {
     const t = params.get("t");
 
     const protooTransport = new protooClient.WebSocketTransport(
-      `wss://commercifly.ml/socket?t=${t}`
+      `wss://${window.location.host}/ws?t=${t}`
     );
 
-    try {
-      this.peer = new protooClient.Peer(protooTransport);
+    this.peer = new protooClient.Peer(protooTransport);
 
-      this.peer.on("open", this.joinRoom);
+    this.peer.on("open", this.joinRoom);
 
-      this.peer.on("request", this.handleRequest);
+    this.peer.on("request", this.handleRequest);
 
-      this.peer.on("notification", this.handleNotification);
+    this.peer.on("notification", this.handleNotification);
 
-      this.peer.on("failed", () => {
-        console.error("WebSocket connection failed");
+    this.peer.on("failed", () => {
+      this.$q.dialog({
+        component: ErrorDialog
       });
 
-      this.evaMenuOutline = evaMenuOutline;
-      this.evaVolumeUpOutline = evaVolumeUpOutline;
-      this.evaVolumeOffOutline = evaVolumeOffOutline;
-      this.evaVolumeDownOutline = evaVolumeDownOutline;
-      this.evaMicOutline = evaMicOutline;
-      this.evaMicOffOutline = evaMicOffOutline;
-      this.evaVideoOutline = evaVideoOutline;
-      this.evaVideoOffOutline = evaVideoOffOutline;
-      this.evaUploadOutline = evaUploadOutline;
-      this.evaDownloadOutline = evaDownloadOutline;
-    } catch (ex) {
-      
-    }
+      this.peer.close();
+    });
+
+    this.evaMenuOutline = evaMenuOutline;
+    this.evaVolumeUpOutline = evaVolumeUpOutline;
+    this.evaVolumeOffOutline = evaVolumeOffOutline;
+    this.evaVolumeDownOutline = evaVolumeDownOutline;
+    this.evaMicOutline = evaMicOutline;
+    this.evaMicOffOutline = evaMicOffOutline;
+    this.evaVideoOutline = evaVideoOutline;
+    this.evaVideoOffOutline = evaVideoOffOutline;
+    this.evaUploadOutline = evaUploadOutline;
+    this.evaDownloadOutline = evaDownloadOutline;
   },
   methods: {
     getWebcamType(device) {
