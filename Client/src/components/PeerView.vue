@@ -1,32 +1,15 @@
 <template>
-  <q-card class="bg-primary video-container">
-    <video ref="video" class="fit" muted autoplay v-if="videoStream" />
+  <div class="video-container">
+    <video ref="video" class="full-width" muted autoplay v-if="videoStream" />
 
-    <div class="column absolute-right no-wrap q-pr-sm full-height controls justify-center">
-      <q-btn :icon="evaMicOutline" round color="pink" class="q-mb-sm">
-        <q-tooltip
-          anchor="center left"
-          self="center right"
-          transition-show="scale"
-          transition-hide="scale"
-          content-class="text-primary bg-accent"
-        >Ativar áudio</q-tooltip>
-      </q-btn>
-      <q-btn :icon="evaVideoOutline" round color="pink" class="q-mb-sm">
-        <q-tooltip
-          anchor="center left"
-          self="center right"
-          transition-show="scale"
-          transition-hide="scale"
-          content-class="text-primary bg-accent"
-        >Iniciar vídeo</q-tooltip>
-      </q-btn>
-    </div>
+    <div class="username">{{peer.displayName}}</div>
 
-    <div class="row absolute-bottom text-subtitle1 no-wrap q-px-md q-pb-sm full-width controls">
+    <div
+      class="flex items-center absolute-bottom text-subtitle1 no-wrap q-px-md q-py-sm full-width controls"
+    >
       <q-icon
         :name="volume == 0 ? evaVolumeOffOutline : (volume <= 20 ? evaVolumeDownOutline: evaVolumeUpOutline)"
-        size="40px"
+        size="32px"
         left
       />
       <q-slider
@@ -39,29 +22,18 @@
         class="col-grow"
         label-text-color="primary"
       />
+      <q-btn class="q-ml-md" :icon="evaVideoOutline" round color="pink" size="12px">
+        <q-tooltip
+          anchor="center left"
+          self="center right"
+          transition-show="scale"
+          transition-hide="scale"
+          content-class="text-primary bg-accent"
+        >Iniciar vídeo</q-tooltip>
+      </q-btn>
     </div>
-  </q-card>
+  </div>
 </template>
-<style scoped>
-.video-container {
-  width: 400px;
-  height: 400px;
-}
-
-.video-container .controls {
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
-
-.video-container:not(:hover) .controls {
-  transition-delay: 0.3s;
-}
-
-.video-container:hover .controls,
-.video-container:active .controls {
-  opacity: 1;
-}
-</style>
 
 <script>
 import {
@@ -87,12 +59,15 @@ export default {
     };
   },
   watch: {
-    videoStream(val) {
-      this.$nextTick(() => {
-        if (val) {
-          this.$refs.video.srcObject = val;
-        }
-      });
+    videoStream: {
+      handler(val) {
+        this.$nextTick(() => {
+          if (val) {
+            this.$refs.video.srcObject = val;
+          }
+        });
+      },
+      immediate: true
     }
   },
   computed: {

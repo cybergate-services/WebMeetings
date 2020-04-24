@@ -1,7 +1,65 @@
 // app global css in Stylus form
-
-
-#q-app {
-    color: rgba(255,255,255,0.75);
+html {
+    color: rgba(255, 255, 255, 0.75);
     background: -webkit-linear-gradient(bottom, #243b55, #141e30);
+}
+
+.video-container .controls {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.video-container .username {
+    background: rgba(0, 0, 0, 0.45);
+    color: white;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.video-container:not(:hover) .controls {
+    transition-delay: 0.3s;
+}
+
+.video-container:hover .controls, .video-container:active .controls {
+    opacity: 1;
+}
+
+.video-container {
+    width: 100%;
+    position: relative;
+}
+
+.video-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    flex-wrap: wrap;
+}
+
+.video-layout > div {
+    max-width: 100%;
+    padding: 8px;
+}
+
+.video-layout.children-2 > div {
+    width: calc((100% / 2));
+}
+
+.video-layout.children-3 > div {
+    width: calc((100% / 2));
+}
+
+.video-layout.children-4 > div {
+    width: calc((100% / 2));
+}
+
+@media only screen and (max-width: 600px) {
+    .video-layout > div {
+        width: 100% !important;
+    }
 }

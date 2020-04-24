@@ -11,7 +11,109 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title>Quasar</q-toolbar-title>
+        <q-toolbar-title>{{displayName}}</q-toolbar-title>
+
+        <q-btn
+          :icon="evaMicOffOutline"
+          v-if="micProducer != null"
+          round
+          color="accent"
+          text-color="primary"
+          class="q-mr-sm"
+          dense
+          @click="disableMic"
+        >
+          <q-tooltip
+            anchor="bottom middle"
+            self="top middle"
+            transition-show="scale"
+            transition-hide="scale"
+            content-class="text-primary bg-accent"
+          >Cancelar compartilhamento áudio</q-tooltip>
+        </q-btn>
+
+        <q-btn
+          :icon="evaMicOutline"
+          v-else
+          round
+          color="pink"
+          class="q-mr-sm"
+          dense
+          @click="enableMic"
+        >
+          <q-tooltip
+            anchor="bottom middle"
+            self="top middle"
+            transition-show="scale"
+            transition-hide="scale"
+            content-class="text-primary bg-accent"
+          >Compartilhar áudio</q-tooltip>
+        </q-btn>
+
+        <q-btn
+          v-if="webcamProducer != null"
+          :icon="evaVideoOffOutline"
+          round
+          color="accent"
+          text-color="primary"
+          class="q-mr-sm"
+          dense
+          @click="disableWebcam"
+        >
+          <q-tooltip
+            anchor="bottom middle"
+            self="top middle"
+            transition-show="scale"
+            transition-hide="scale"
+            content-class="text-primary bg-accent"
+          >Cancelar compartilhamento de vídeo</q-tooltip>
+        </q-btn>
+
+        <q-btn
+          v-else
+          :icon="evaVideoOutline"
+          round
+          color="pink"
+          class="q-mr-sm"
+          dense
+          @click="disableWebcam"
+        >
+          <q-tooltip
+            anchor="bottom middle"
+            self="top middle"
+            transition-show="scale"
+            transition-hide="scale"
+            content-class="text-primary bg-accent"
+          >Compartilhar vídeo</q-tooltip>
+        </q-btn>
+
+        <q-btn
+          :icon="evaDownloadOutline"
+          v-if="shareProducer != null"
+          round
+          color="accent"
+          text-color="primary"
+          dense
+          @click="disableShare"
+        >
+          <q-tooltip
+            anchor="bottom middle"
+            self="top middle"
+            transition-show="scale"
+            transition-hide="scale"
+            content-class="text-primary bg-accent"
+          >Cancelar compartilhamento de tela</q-tooltip>
+        </q-btn>
+
+        <q-btn v-else :icon="evaUploadOutline" round color="pink" dense @click="enableShare">
+          <q-tooltip
+            anchor="bottom middle"
+            self="top middle"
+            transition-show="scale"
+            transition-hide="scale"
+            content-class="text-primary bg-accent"
+          >Compartilhar tela</q-tooltip>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
@@ -25,21 +127,15 @@
     </q-drawer>
 
     <q-page-container>
-      <q-page class="row justify-center items-center q-pa-md q-col-gutter-md">
-        <div class="col-xs-12 col-md-6">
-          <VideoContainer
-            @enableShare="enableShare"
-            @disableShare="disableShare"
-            @enableVideo="enableWebcam"
-            @disableVideo="disableWebcam"
-            :sharingScreen="shareProducer != null"
-            :sharingVideo="webcamProducer != null"
-            :producers="producers"
-          />
+      <q-page class="video-layout" :class="`children-${videoCount}`">
+        <div v-if="webcamProducer || shareProducer">
+          <VideoContainer :producers="producers" :displayName="displayName" />
         </div>
-        <div class="col-xs-12 col-md-6">
-          <PeerView v-for="peer in Object.values(peers)" :key="peer.id" :peer="peer" />
-        </div>
+        <template v-for="peer in Object.values(peers)">
+          <div :key="peer.id" v-if="peer.consumers.some(consumer => consumer.type === 'simple')">
+            <PeerView :peer="peer" />
+          </div>
+        </template>
       </q-page>
     </q-page-container>
   </q-layout>
@@ -50,7 +146,19 @@ import protooClient from "protoo-client";
 import * as mediasoupClient from "mediasoup-client";
 import VideoContainer from "../components/VideoContainer";
 import PeerView from "../components/PeerView";
-import { evaMenuOutline } from "@quasar/extras/eva-icons";
+
+import {
+  evaVolumeUpOutline,
+  evaVolumeOffOutline,
+  evaVolumeDownOutline,
+  evaMicOutline,
+  evaMicOffOutline,
+  evaVideoOffOutline,
+  evaVideoOutline,
+  evaUploadOutline,
+  evaDownloadOutline,
+  evaMenuOutline
+} from "@quasar/extras/eva-icons";
 
 const VIDEO_CONSTRAINS = {
   qvga: { width: { ideal: 320 }, height: { ideal: 240 } },
@@ -108,6 +216,14 @@ export default {
       }
     };
   },
+  computed: {
+    videoCount() {
+      return (
+        (this.webcamProducer != null || this.shareProducer != null ? 1 : 0) +
+        Object.values(this.peers).length
+      );
+    }
+  },
   created() {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("t");
@@ -129,6 +245,15 @@ export default {
     });
 
     this.evaMenuOutline = evaMenuOutline;
+    this.evaVolumeUpOutline = evaVolumeUpOutline;
+    this.evaVolumeOffOutline = evaVolumeOffOutline;
+    this.evaVolumeDownOutline = evaVolumeDownOutline;
+    this.evaMicOutline = evaMicOutline;
+    this.evaMicOffOutline = evaMicOffOutline;
+    this.evaVideoOutline = evaVideoOutline;
+    this.evaVideoOffOutline = evaVideoOffOutline;
+    this.evaUploadOutline = evaUploadOutline;
+    this.evaDownloadOutline = evaDownloadOutline;
   },
   methods: {
     getWebcamType(device) {
@@ -141,6 +266,97 @@ export default {
 
         return "front";
       }
+    },
+    async enableMic() {
+      console.debug("enableMic()");
+
+      if (this.micProducer) return;
+
+      if (!this.mediasoupDevice.canProduce("audio")) {
+        console.error("enableMic() | cannot produce audio");
+
+        return;
+      }
+
+      let track;
+
+      try {
+        if (!this.externalVideo) {
+          console.debug("enableMic() | calling getUserMedia()");
+
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true
+          });
+
+          track = stream.getAudioTracks()[0];
+        } else {
+          const stream = await this.getExternalVideoStream();
+
+          track = stream.getAudioTracks()[0].clone();
+        }
+
+        this.micProducer = await this.sendTransport.produce({
+          track,
+          codecOptions: {
+            opusStereo: 1,
+            opusDtx: 1
+          }
+        });
+
+        this.$set(this.producers, this.micProducer.id, {
+          id: this.micProducer.id,
+          paused: this.micProducer.paused,
+          track: this.micProducer.track,
+          rtpParameters: this.micProducer.rtpParameters,
+          codec: this.micProducer.rtpParameters.codecs[0].mimeType.split("/")[1]
+        });
+
+        this.micProducer.on("transportclose", () => {
+          this.micProducer = null;
+        });
+
+        this.micProducer.on("trackended", () => {
+          this.$q.notify({
+            color: "info",
+            message: "Microphone disconnected!"
+          });
+
+          this.disableMic().catch(() => {});
+        });
+      } catch (error) {
+        console.error("enableMic() | failed:%o", error);
+
+        this.$q.notify({
+          color: "negative",
+          message: `Error enabling microphone: ${error}`
+        });
+
+        if (track) track.stop();
+      }
+    },
+    async disableMic() {
+      console.debug("disableMic()");
+
+      if (!this.micProducer) return;
+
+      this.micProducer.close();
+
+      this.$delete(this.producers, this.micProducer.id);
+
+      try {
+        await this._protoo.request("closeProducer", {
+          producerId: this.micProducer.id
+        });
+      } catch (error) {
+        store.dispatch(
+          this.$q.notify({
+            color: "negative",
+            message: `Error closing server-side mic Producer: ${error}`
+          })
+        );
+      }
+
+      this.micProducer = null;
     },
     async enableWebcam() {
       console.debug("enableWebcam()");
@@ -198,15 +414,12 @@ export default {
             encodings = VIDEO_KSVC_ENCODINGS;
           else encodings = VIDEO_SIMULCAST_ENCODINGS;
 
-          this._webcamProducer = await this._sendTransport.produce({
+          this.webcamProducer = await this.sendTransport.produce({
             track,
             encodings,
             codecOptions: {
               videoGoogleStartBitrate: 1000
             }
-            // NOTE: for testing codec selection.
-            // codec : this._mediasoupDevice.rtpCapabilities.codecs
-            // 	.find((codec) => codec.mimeType.toLowerCase() === 'video/h264')
           });
         } else {
           this.webcamProducer = await this.sendTransport.produce({ track });
