@@ -46,11 +46,6 @@ html {
     padding: 8px;
 }
 
-.video-layout video  {
-    height: 100%;
-}
-
-
 .video-layout.children-2 > div {
     width: calc((100% / 2));
 }
@@ -63,8 +58,28 @@ html {
     width: calc((100% / 2));
 }
 
+.video-layout.children-1 video {
+    max-height: calc(100vh - 82px);
+}
+
+.video-layout.children-2 video {
+    max-height: calc(100vh - 82px);
+}
+
+.video-layout.children-3 video {
+    max-height: calc(((100vh - 50px) * 0.5) - (16px * 3));
+}
+
+.video-layout.children-4 video {
+    max-height: calc(((100vh - 50px) * 0.5) - (16px * 3));
+}
+
 @media only screen and (max-width: 600px) {
     .video-layout > div {
         width: 100% !important;
+    }
+
+    .video-layout video {
+        max-height: auto;
     }
 }

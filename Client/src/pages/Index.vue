@@ -232,28 +232,32 @@ export default {
       `wss://commercifly.ml/socket?t=${t}`
     );
 
-    this.peer = new protooClient.Peer(protooTransport);
+    try {
+      this.peer = new protooClient.Peer(protooTransport);
 
-    this.peer.on("open", this.joinRoom);
+      this.peer.on("open", this.joinRoom);
 
-    this.peer.on("request", this.handleRequest);
+      this.peer.on("request", this.handleRequest);
 
-    this.peer.on("notification", this.handleNotification);
+      this.peer.on("notification", this.handleNotification);
 
-    this.peer.on("failed", () => {
-      console.error("WebSocket connection failed");
-    });
+      this.peer.on("failed", () => {
+        console.error("WebSocket connection failed");
+      });
 
-    this.evaMenuOutline = evaMenuOutline;
-    this.evaVolumeUpOutline = evaVolumeUpOutline;
-    this.evaVolumeOffOutline = evaVolumeOffOutline;
-    this.evaVolumeDownOutline = evaVolumeDownOutline;
-    this.evaMicOutline = evaMicOutline;
-    this.evaMicOffOutline = evaMicOffOutline;
-    this.evaVideoOutline = evaVideoOutline;
-    this.evaVideoOffOutline = evaVideoOffOutline;
-    this.evaUploadOutline = evaUploadOutline;
-    this.evaDownloadOutline = evaDownloadOutline;
+      this.evaMenuOutline = evaMenuOutline;
+      this.evaVolumeUpOutline = evaVolumeUpOutline;
+      this.evaVolumeOffOutline = evaVolumeOffOutline;
+      this.evaVolumeDownOutline = evaVolumeDownOutline;
+      this.evaMicOutline = evaMicOutline;
+      this.evaMicOffOutline = evaMicOffOutline;
+      this.evaVideoOutline = evaVideoOutline;
+      this.evaVideoOffOutline = evaVideoOffOutline;
+      this.evaUploadOutline = evaUploadOutline;
+      this.evaDownloadOutline = evaDownloadOutline;
+    } catch (ex) {
+      
+    }
   },
   methods: {
     getWebcamType(device) {

@@ -36,10 +36,10 @@ async function run() {
     await runExpressServer();
 
     await new Promise((resolve) => {
-        httpServer.listen(80, resolve);
+        httpServer.listen(3000, resolve);
     });
 
-    logger.info('listening on port 80');
+    logger.info('listening on port 3000');
 
     await runMediasoupServer();
 }
