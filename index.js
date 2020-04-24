@@ -81,6 +81,7 @@ async function runServer() {
             rooms.get("default").handleConnection(peer);
         }
         catch (ex) {
+            console.log(ex);
             reject(403, 'Not Allowed');
         };
     });
