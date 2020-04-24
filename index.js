@@ -66,7 +66,7 @@ async function runMediasoupServer() {
             console.log(token);
 
             const user = await new Promise((resolve, reject) => {
-                jwt.verify(token, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { issuer: "CCC Montitoramento", audience: "cccfacil.com.br" }, function (err, decoded) {
+                jwt.verify(token, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { issuer: "CCC Monitoramento", audience: "cccfacil.com.br" }, function (err, decoded) {
                     if (err)
                         reject(err);
                     else
