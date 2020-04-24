@@ -55,9 +55,9 @@ async function runServer() {
         // The app inspects the `info` object and decides whether to accept the
         // connection or not.  
         try {
-            const url = url.parse(info.request.url, true);
+            const u = url.parse(info.request.url, true);
 
-            const token = url.query['token'];
+            const token = u.query['token'];
 
             const user = await new Promise((resolve, reject) => {
                 jwt.verify(token, 'qwertyuiopasdfghjklzxcvbnm123456', { issuer: "cccfacil.com.br", audience: "cccfacil.com.br" }, function (err, decoded) {
