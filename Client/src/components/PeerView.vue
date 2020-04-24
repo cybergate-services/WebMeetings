@@ -1,6 +1,6 @@
 <template>
   <div class="video-container">
-    <video ref="video" class="full-width" muted autoplay v-if="videoStream" />
+    <video ref="video" class="full-width" autoplay muted v-if="mediaStream" />
 
     <div class="username">{{peer.displayName}}</div>
 
@@ -22,15 +22,6 @@
         class="col-grow"
         label-text-color="primary"
       />
-      <q-btn class="q-ml-md" :icon="evaVideoOutline" round color="pink" size="12px">
-        <q-tooltip
-          anchor="center left"
-          self="center right"
-          transition-show="scale"
-          transition-hide="scale"
-          content-class="text-primary bg-accent"
-        >Iniciar vídeo</q-tooltip>
-      </q-btn>
     </div>
   </div>
 </template>
@@ -55,15 +46,59 @@ export default {
   },
   data() {
     return {
-      volume: 0
+      volume: 0,
+      hasAudio: false,
+      hasVideo: false
     };
   },
   watch: {
-    videoStream: {
+    volume() {
+      this.$nextTick(() => {
+        this.$refs.video.volume = this.volume / 100;
+        console.log(this.volume);
+      });
+    },
+    muted: {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.video.muted = this.muted;
+        });
+      },
+      immediate: true
+    },
+    "peer.consumers": {
+      handler(val) {
+        if (val.length > 0) {
+          let oldTracks = [...this.mediaStream.getTracks()];
+          let newTracks = val.map(consumer => consumer.track);
+
+          this.hasAudio = newTracks.some(track => track.kind === "audio");
+          this.hasVideo = newTracks.some(track => track.kind === "video");
+
+          for (const track of newTracks) {
+            if (!oldTracks.includes(track)) {
+              this.mediaStream.addTrack(track);
+            }
+          }
+
+          for (const track of oldTracks) {
+            if (!newTracks.includes(track)) {
+              this.mediaStream.removeTrack(track);
+            }
+          }
+        } else {
+          this.hasAudio = false;
+          this.hasVideo = false;
+        }
+      },
+      immediate: true,
+      deep: true
+    },
+    mediaStream: {
       handler(val) {
         this.$nextTick(() => {
-          if (val) {
-            this.$refs.video.srcObject = val;
+          if (this.mediaStream) {
+            this.$refs.video.srcObject = this.mediaStream;
           }
         });
       },
@@ -71,17 +106,12 @@ export default {
     }
   },
   computed: {
-    videoStream() {
-      const videoProducer = this.peer.consumers.find(
-        consumer => consumer.type === "simple"
-      );
-
-      if (videoProducer) {
-        const videoStream = new MediaStream();
-
-        videoStream.addTrack(videoProducer.track);
-
-        return videoStream;
+    muted() {
+      return !this.hasAudio || this.volume == 0;
+    },
+    mediaStream() {
+      if (this.peer.consumers.length > 0) {
+        return new MediaStream();
       } else return null;
     }
   },

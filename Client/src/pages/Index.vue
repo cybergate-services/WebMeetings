@@ -161,9 +161,9 @@ import {
 } from "@quasar/extras/eva-icons";
 
 const VIDEO_CONSTRAINS = {
-  qvga: { width: { ideal: 320 }, height: { ideal: 240 } },
-  vga: { width: { ideal: 640 }, height: { ideal: 480 } },
-  hd: { width: { ideal: 1280 }, height: { ideal: 720 } }
+  qvga: { width: { exact: 320 }, height: { exact: 240 } },
+  vga: { width: { exact: 640 }, height: { exact: 480 } },
+  hd: { width: { exact: 1280 }, height: { exact: 720 } }
 };
 
 const PC_PROPRIETARY_CONSTRAINTS = {
