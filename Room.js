@@ -245,26 +245,13 @@ class Room extends protooServer.Room {
                         throw new Error('Peer already joined');
 
                     const {
-                        token,
                         device,
                         rtpCapabilities,
                         sctpCapabilities
                     } = request.data;
 
-
-                    const user = await new Promise((resolve, reject) => {
-                        jwt.verify(token, 'qwertyuiopasdfghjklzxcvbnm123456', { issuer: "cccfacil.com.br", audience: "cccfacil.com.br" }, function (err, decoded) {
-                            if (err)
-                                reject(err);
-                            else
-                                resolve(decoded);
-                        });
-                    });
-
                     // Store client data into the protoo Peer data object.
                     peer.data.joined = true;
-                    peer.data.displayName = user.sub;
-                    peer.data.role = user.role;
                     peer.data.device = device;
                     peer.data.rtpCapabilities = rtpCapabilities;
                     peer.data.sctpCapabilities = sctpCapabilities;

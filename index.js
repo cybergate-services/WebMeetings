@@ -32,11 +32,10 @@ async function run() {
 
     await createRoom();
 
-    await new Promise((resolve) =>
-	{
-		httpServer.listen(80, resolve);
+    await new Promise((resolve) => {
+        httpServer.listen(80, resolve);
     });
-    
+
     logger.info('listening on port 80');
 
     await runServer();
@@ -54,6 +53,21 @@ async function runServer() {
     server.on('connectionrequest', async (info, accept, reject) => {
         // The app inspects the `info` object and decides whether to accept the
         // connection or not.  
+
+        console.log(info);
+
+        const user = await new Promise((resolve, reject) => {
+            jwt.verify(token, 'qwertyuiopasdfghjklzxcvbnm123456', { issuer: "cccfacil.com.br", audience: "cccfacil.com.br" }, function (err, decoded) {
+                if (err)
+                    reject(err);
+                else
+                    resolve(decoded);
+            });
+        });
+
+        peer.data.displayName = user.sub;
+        peer.data.role = user.role;
+
         try {
             const transport = accept();
 
@@ -75,7 +89,7 @@ async function runServer() {
 async function runMediasoupWorkers() {
     const { numWorkers } = config.mediasoup;
 
-	logger.info('running %d mediasoup Workers...', numWorkers);
+    logger.info('running %d mediasoup Workers...', numWorkers);
 
     for (let i = 0; i < numWorkers; ++i) {
         const worker = await mediasoup.createWorker(
