@@ -68,13 +68,13 @@ async function runServer() {
                 });
             });
 
-            peer.data.displayName = user.sub;
-            peer.data.role = user.role;
-
             const transport = accept();
 
             // The app chooses a `peerId` and creates a peer within a specific room.
             const peer = await rooms.get("default").createPeer(cuid(), transport);
+
+            peer.data.displayName = user.sub;
+            peer.data.role = user.role;
 
             console.log('peer created %s', peer.id);
 
