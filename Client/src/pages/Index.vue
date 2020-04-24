@@ -76,7 +76,7 @@
           color="pink"
           class="q-mr-sm"
           dense
-          @click="disableWebcam"
+          @click="enableWebcam"
         >
           <q-tooltip
             anchor="bottom middle"
@@ -344,16 +344,14 @@ export default {
       this.$delete(this.producers, this.micProducer.id);
 
       try {
-        await this._protoo.request("closeProducer", {
+        await this.peer.request("closeProducer", {
           producerId: this.micProducer.id
         });
       } catch (error) {
-        store.dispatch(
-          this.$q.notify({
-            color: "negative",
-            message: `Error closing server-side mic Producer: ${error}`
-          })
-        );
+        this.$q.notify({
+          color: "negative",
+          message: `Error closing server-side mic Producer: ${error}`
+        });
       }
 
       this.micProducer = null;
