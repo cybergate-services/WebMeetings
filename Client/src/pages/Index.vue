@@ -25,18 +25,21 @@
     </q-drawer>
 
     <q-page-container>
-      <q-page class="flex flex-center">
-        <VideoContainer
-          @enableShare="enableShare"
-          @disableShare="disableShare"
-          @enableVideo="enableWebcam"
-          @disableVideo="disableWebcam"
-          :sharingScreen="shareProducer != null"
-          :sharingVideo="webcamProducer != null"
-          :producers="producers"
-        />
-
-        <PeerView v-for="peer in Object.values(peers)" :key="peer.id" :peer="peer" />
+      <q-page class="row justify-center items-center q-pa-md q-col-gutter-md">
+        <div class="col-xs-12 col-md-6">
+          <VideoContainer
+            @enableShare="enableShare"
+            @disableShare="disableShare"
+            @enableVideo="enableWebcam"
+            @disableVideo="disableWebcam"
+            :sharingScreen="shareProducer != null"
+            :sharingVideo="webcamProducer != null"
+            :producers="producers"
+          />
+        </div>
+        <div class="col-xs-12 col-md-6">
+          <PeerView v-for="peer in Object.values(peers)" :key="peer.id" :peer="peer" />
+        </div>
       </q-page>
     </q-page-container>
   </q-layout>
@@ -106,8 +109,11 @@ export default {
     };
   },
   created() {
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("t");
+
     const protooTransport = new protooClient.WebSocketTransport(
-      `wss://${window.location.hostname}:8080/socket?token=${"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjY2NmYWNpbC5jb20uYnIiLCJpYXQiOjE1ODc2NzgxMDYsImV4cCI6MTYxOTIxNDEwMiwiYXVkIjoiY2NjZmFjaWwuY29tLmJyIiwic3ViIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4ifQ.wNG4hQBTDHgILiIn9Ypx4wqMDP4M8y1xbvd1EyniFnQ"}`,
+      `wss://commercifly.ml/socket?t=${t}`
     );
 
     this.peer = new protooClient.Peer(protooTransport);

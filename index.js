@@ -7,8 +7,10 @@ const logger = require("./logger");
 const Room = require("./Room");
 const jwt = require("jsonwebtoken");
 const mediasoup = require('mediasoup');
+const express = require('express');
+const app = express();
 
-const httpServer = http.createServer();
+const httpServer = http.createServer(app);
 
 // mediasoup Workers.
 const mediasoupWorkers = [];
@@ -24,8 +26,6 @@ const options =
     fragmentationThreshold: 960000
 };
 
-let server;
-
 const rooms = new Map();
 
 async function run() {
@@ -33,13 +33,15 @@ async function run() {
 
     await createRoom();
 
+    await runExpressServer();
+
     await new Promise((resolve) => {
         httpServer.listen(80, resolve);
     });
 
     logger.info('listening on port 80');
 
-    await runServer();
+    await runMediasoupServer();
 }
 
 async function createRoom() {
@@ -48,19 +50,21 @@ async function createRoom() {
     rooms.set("default", await Room.create(mediasoupWorker));
 }
 
-async function runServer() {
-    server = new protooServer.WebSocketServer(httpServer, options);
+async function runMediasoupServer() {
+    const mediasoupServer = new protooServer.WebSocketServer(httpServer, options);
 
-    server.on('connectionrequest', async (info, accept, reject) => {
-        // The app inspects the `info` object and decides whether to accept the
-        // connection or not.  
+    mediasoupServer.on('connectionrequest', async (info, accept, reject) => {
         try {
             const u = url.parse(info.request.url, true);
 
-            const token = u.query['token'];
+            const token = u.query['t'];
+
+            if(!token){
+                return reject(401, 'Unauthorized');
+            }
 
             const user = await new Promise((resolve, reject) => {
-                jwt.verify(token, 'qwertyuiopasdfghjklzxcvbnm123456', { issuer: "cccfacil.com.br", audience: "cccfacil.com.br" }, function (err, decoded) {
+                jwt.verify(token, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { issuer: "cccfacil.com.br", audience: "cccfacil.com.br" }, function (err, decoded) {
                     if (err)
                         reject(err);
                     else
@@ -81,9 +85,82 @@ async function runServer() {
             rooms.get("default").handleConnection(peer);
         }
         catch (ex) {
-            console.log(ex);
-            reject(403, 'Not Allowed');
+            reject(401, 'Unauthorized');
         };
+    });
+}
+
+async function runExpressServer() {
+    const bodyParser = require('body-parser');
+
+    app.use(bodyParser.urlencoded({ extended: false }));
+
+    app.use(bodyParser.json());
+
+    app.use(function (req, res, next) {
+        const token = req.headers.authorization;
+
+        if (!token) {
+            req.user = null;
+
+            next();
+        }
+        else {
+            jwt.verify(token, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { issuer: "CCC Monitoramento", audience: "cccfacil.com.br" }, function (err, decoded) {
+                if (err) {
+                    req.user = null;
+                }
+                else {
+                    req.user = decoded;
+                }
+
+                next();
+            });
+        }
+    });
+
+    app.post('/api/user', function (req, res) {
+        if (!req.user || req.user.role !== "admin") {
+            return res.status(401).send('Unauthorized');
+        }
+
+        const { displayName } = req.body;
+
+        jwt.sign({
+            exp: Math.floor(Date.now() / 1000) + (60 * 15),
+            iat: Math.floor(Date.now() / 1000),
+            role: "user",
+            sub: displayName,
+            iss: "CCC Monitoramento",
+            aud: "cccfacil.com.br"
+        }, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { algorithm: 'RS256' }, function (err, token) {
+            if (err)
+                return res.status(500).send('Internal Server Error');
+
+            res.status(200).send(token);
+        });
+    });
+
+    app.post('/api/admin', function (req, res) {
+        if (!req.user || req.user.role !== "admin") {
+            return res.status(401).send('Unauthorized');
+        }
+
+        const { displayName } = req.body;
+
+        jwt.sign({
+            exp: Math.floor(Date.now() / 1000) + (60 * 15),
+            iat: Math.floor(Date.now() / 1000),
+            role: "admin",
+            sub: displayName,
+            iss: "CCC Monitoramento",
+            aud: "cccfacil.com.br"
+        }, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { algorithm: 'RS256' }, function (err, token) {
+            if (err)
+                return res.status(500).send('Internal Server Error');
+
+            res.status(200).send(token);
+        });
     });
 }
 
