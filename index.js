@@ -1,10 +1,11 @@
 const protooServer = require('protoo-server');
 const http = require('http');
 const cuid = require('cuid');
+const url = require('url');
 const config = require("./config");
 const logger = require("./logger");
 const Room = require("./Room");
-
+const jwt = require("jsonwebtoken");
 const mediasoup = require('mediasoup');
 
 const httpServer = http.createServer();
@@ -53,22 +54,23 @@ async function runServer() {
     server.on('connectionrequest', async (info, accept, reject) => {
         // The app inspects the `info` object and decides whether to accept the
         // connection or not.  
-
-        console.log(info);
-
-        const user = await new Promise((resolve, reject) => {
-            jwt.verify(token, 'qwertyuiopasdfghjklzxcvbnm123456', { issuer: "cccfacil.com.br", audience: "cccfacil.com.br" }, function (err, decoded) {
-                if (err)
-                    reject(err);
-                else
-                    resolve(decoded);
-            });
-        });
-
-        peer.data.displayName = user.sub;
-        peer.data.role = user.role;
-
         try {
+            const url = url.parse(info.request.url, true);
+
+            const token = url.query['token'];
+
+            const user = await new Promise((resolve, reject) => {
+                jwt.verify(token, 'qwertyuiopasdfghjklzxcvbnm123456', { issuer: "cccfacil.com.br", audience: "cccfacil.com.br" }, function (err, decoded) {
+                    if (err)
+                        reject(err);
+                    else
+                        resolve(decoded);
+                });
+            });
+
+            peer.data.displayName = user.sub;
+            peer.data.role = user.role;
+
             const transport = accept();
 
             // The app chooses a `peerId` and creates a peer within a specific room.
@@ -79,8 +81,6 @@ async function runServer() {
             rooms.get("default").handleConnection(peer);
         }
         catch (ex) {
-            console.error(ex);
-
             reject(403, 'Not Allowed');
         };
     });

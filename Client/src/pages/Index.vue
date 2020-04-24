@@ -107,12 +107,7 @@ export default {
   },
   created() {
     const protooTransport = new protooClient.WebSocketTransport(
-      `wss://${window.location.hostname}:8080/socket`,
-      {
-        headers: {
-          Authorization: `Bearer ${"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjY2NmYWNpbC5jb20uYnIiLCJpYXQiOjE1ODc2NzgxMDYsImV4cCI6MTYxOTIxNDEwMiwiYXVkIjoiY2NjZmFjaWwuY29tLmJyIiwic3ViIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4ifQ.wNG4hQBTDHgILiIn9Ypx4wqMDP4M8y1xbvd1EyniFnQ"}`
-        }
-      }
+      `wss://${window.location.hostname}:8080/socket?token=${"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjY2NmYWNpbC5jb20uYnIiLCJpYXQiOjE1ODc2NzgxMDYsImV4cCI6MTYxOTIxNDEwMiwiYXVkIjoiY2NjZmFjaWwuY29tLmJyIiwic3ViIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4ifQ.wNG4hQBTDHgILiIn9Ypx4wqMDP4M8y1xbvd1EyniFnQ"}`,
     );
 
     this.peer = new protooClient.Peer(protooTransport);

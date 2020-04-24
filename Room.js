@@ -1,6 +1,5 @@
 const protooServer = require('protoo-server');
 const config = require("./config");
-const jwt = require("jsonwebtoken");
 
 class Room extends protooServer.Room {
     static async create(mediasoupWorker) {
