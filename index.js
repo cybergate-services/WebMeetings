@@ -63,6 +63,8 @@ async function runMediasoupServer() {
                 return reject(401, 'Unauthorized');
             }
 
+            console.log(token);
+
             const user = await new Promise((resolve, reject) => {
                 jwt.verify(token, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { issuer: "cccfacil.com.br", audience: "cccfacil.com.br" }, function (err, decoded) {
                     if (err)
@@ -71,6 +73,8 @@ async function runMediasoupServer() {
                         resolve(decoded);
                 });
             });
+
+            console.log(user);
 
             const transport = accept();
 
@@ -85,6 +89,7 @@ async function runMediasoupServer() {
             rooms.get("default").handleConnection(peer);
         }
         catch (ex) {
+            console.error(ex);
             reject(401, 'Unauthorized');
         };
     });
