@@ -52,7 +52,7 @@ module.exports = function (/* ctx */) {
       directives: [],
 
       // Quasar plugins
-      plugins: ["Notify"]
+      plugins: ["Notify", "Dialog"]
     },
 
     // https://quasar.dev/quasar-cli/cli-documentation/supporting-ie
@@ -86,8 +86,8 @@ module.exports = function (/* ctx */) {
       open: true, // opens browser window automatically,
       proxy: {
         // proxy all requests starting with /api to jsonplaceholder
-        '/socket': {
-          target: 'ws://23.236.49.182:80',
+        '/ws': {
+          target: 'ws://45.55.58.119:80',
           changeOrigin: true,
           ws: true
         }

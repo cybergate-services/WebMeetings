@@ -1,6 +1,6 @@
 <template>
   <q-card class="video-container">
-    <video ref="video" class="fit" muted autoplay v-if="videoStream" />
+    <video ref="video" class="fit" muted autoplay v-if="videoStream" playsinline controls />
     <div class="username">
       {{displayName}}
     </div>

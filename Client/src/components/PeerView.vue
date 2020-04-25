@@ -1,11 +1,12 @@
 <template>
   <div class="video-container">
-    <video ref="video" class="full-width" autoplay muted v-if="mediaStream" />
+    <video ref="video" class="full-width" autoplay muted v-if="mediaStream" controls playsinline />
 
     <div class="username">{{peer.displayName}}</div>
 
     <div
       class="flex items-center absolute-bottom text-subtitle1 no-wrap q-px-md q-py-sm full-width controls"
+      v-if="1==2"
     >
       <q-icon
         :name="volume == 0 ? evaVolumeOffOutline : (volume <= 20 ? evaVolumeDownOutline: evaVolumeUpOutline)"
@@ -42,11 +43,12 @@ import {
 export default {
   name: "PeerView",
   props: {
-    peer: Object
+    peer: Object,
+    allowsAudio: Boolean
   },
   data() {
     return {
-      volume: 0,
+      volume: 100,
       hasAudio: false,
       hasVideo: false
     };
@@ -61,38 +63,12 @@ export default {
     muted: {
       handler() {
         this.$nextTick(() => {
-          this.$refs.video.muted = this.muted;
+          if (!this.muted) {
+            this.$refs.video.muted = this.muted;
+          }
         });
       },
       immediate: true
-    },
-    "peer.consumers": {
-      handler(val) {
-        if (val.length > 0) {
-          let oldTracks = [...this.mediaStream.getTracks()];
-          let newTracks = val.map(consumer => consumer.track);
-
-          this.hasAudio = newTracks.some(track => track.kind === "audio");
-          this.hasVideo = newTracks.some(track => track.kind === "video");
-
-          for (const track of newTracks) {
-            if (!oldTracks.includes(track)) {
-              this.mediaStream.addTrack(track);
-            }
-          }
-
-          for (const track of oldTracks) {
-            if (!newTracks.includes(track)) {
-              this.mediaStream.removeTrack(track);
-            }
-          }
-        } else {
-          this.hasAudio = false;
-          this.hasVideo = false;
-        }
-      },
-      immediate: true,
-      deep: true
     },
     mediaStream: {
       handler(val) {
@@ -107,11 +83,17 @@ export default {
   },
   computed: {
     muted() {
-      return !this.hasAudio || this.volume == 0;
+      return !this.allowsAudio || !this.hasAudio || this.volume == 0;
     },
     mediaStream() {
       if (this.peer.consumers.length > 0) {
-        return new MediaStream();
+        const mediaStream = new MediaStream();
+
+        for(let track of this.peer.consumers.map(consumer => consumer.track)){
+          mediaStream.addTrack(track);
+        }
+
+        return mediaStream;
       } else return null;
     }
   },

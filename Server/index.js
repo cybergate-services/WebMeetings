@@ -59,14 +59,12 @@ async function runMediasoupServer() {
 
             const token = u.query['t'];
 
-            if(!token){
+            if (!token) {
                 return reject(401, 'Unauthorized');
             }
 
-            console.log(token);
-
             const user = await new Promise((resolve, reject) => {
-                jwt.verify(token, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { issuer: "CCC Monitoramento", audience: "cccfacil.com.br" }, function (err, decoded) {
+                jwt.verify(token, config.jwt.SECRET, { issuer: config.jwt.ISSUER, audience: config.jwt.AUDIENCE }, function (err, decoded) {
                     if (err)
                         reject(err);
                     else
@@ -74,14 +72,12 @@ async function runMediasoupServer() {
                 });
             });
 
-            console.log(user);
-
             const transport = accept();
 
             // The app chooses a `peerId` and creates a peer within a specific room.
-            const peer = await rooms.get("default").createPeer(cuid(), transport);
+            const peer = await rooms.get("default").createPeer(user.sub, transport);
 
-            peer.data.displayName = user.sub;
+            peer.data.displayName = user.displayName;
             peer.data.role = user.role;
 
             console.log('peer created %s', peer.id);
@@ -111,7 +107,7 @@ async function runExpressServer() {
             next();
         }
         else {
-            jwt.verify(token, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { issuer: "CCC Monitoramento", audience: "cccfacil.com.br" }, function (err, decoded) {
+            jwt.verify(token, config.jwt.SECRET, { issuer: config.jwt.ISSUER, audience: config.jwt.AUDIENCE }, function (err, decoded) {
                 if (err) {
                     req.user = null;
                 }
@@ -135,10 +131,11 @@ async function runExpressServer() {
             exp: Math.floor(Date.now() / 1000) + (60 * 15),
             iat: Math.floor(Date.now() / 1000),
             role: "user",
-            sub: displayName,
-            iss: "CCC Monitoramento",
-            aud: "cccfacil.com.br"
-        }, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { algorithm: 'RS256' }, function (err, token) {
+            displayName: displayName,
+            sub: cuid(),
+            iss: config.jwt.ISSUER,
+            aud: config.jwt.AUDIENCE
+        }, config.jwt.SECRET, { algorithm: 'RS256' }, function (err, token) {
             if (err)
                 return res.status(500).send('Internal Server Error');
 
@@ -157,10 +154,11 @@ async function runExpressServer() {
             exp: Math.floor(Date.now() / 1000) + (60 * 15),
             iat: Math.floor(Date.now() / 1000),
             role: "admin",
-            sub: displayName,
-            iss: "CCC Monitoramento",
-            aud: "cccfacil.com.br"
-        }, 'zMsFo4MHa9X20ZQuxDHsHldzxj4Iq4P3', { algorithm: 'RS256' }, function (err, token) {
+            displayName: displayName,
+            sub: cuid(),
+            iss: config.jwt.ISSUER,
+            aud: config.jwt.AUDIENCE
+        }, config.jwt.SECRET, { algorithm: 'RS256' }, function (err, token) {
             if (err)
                 return res.status(500).send('Internal Server Error');
 

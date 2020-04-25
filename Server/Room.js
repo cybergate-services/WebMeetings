@@ -38,7 +38,7 @@ class Room extends protooServer.Room {
             .filter((peer) => peer.data.joined && predicate(peer));
     }
 
-    handleConnection(peer) {
+    async handleConnection(peer) {
         console.info(
             'handleConnection [peerId:%s]', peer.id);
 
@@ -235,6 +235,9 @@ class Room extends protooServer.Room {
 
     async handleRequest(peer, request, accept, reject) {
         switch (request.method) {
+            case "userInfo":
+                accept({ displayName: peer.data.displayName, role: peer.data.role });
+                break;
             case "getRouterRtpCapabilities":
                 accept(this.mediasoupRouter.rtpCapabilities);
                 break;
@@ -263,7 +266,7 @@ class Room extends protooServer.Room {
                             device: joinedPeer.data.device
                         }));
 
-                    accept({ peers: peerInfos, displayName: peer.data.displayName, role: peer.data.role });
+                    accept({ peers: peerInfos });
 
                     peer.data.joined = true;
 

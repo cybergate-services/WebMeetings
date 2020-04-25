@@ -21,4 +21,8 @@ COPY ./Server/package*.json ./
 RUN npm install --only=production
 COPY ./Server ./
 
+EXPOSE 80 443
+EXPOSE 40000-40200/udp
+EXPOSE 40000-40200/tcp
+
 CMD nginx && (node /server/index.js)

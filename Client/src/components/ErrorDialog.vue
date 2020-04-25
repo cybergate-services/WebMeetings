@@ -5,7 +5,7 @@
         <q-icon :name="evaAlertCircleOutline" size="96px" color="warning" />
       </q-card-section>
 
-      <q-card-section class="text-caption">Seu acesso ainda não está autorizado para este conteúdo.</q-card-section>
+      <q-card-section class="text-caption text-center text-black">Seu acesso ainda não está autorizado para este conteúdo.</q-card-section>
     </q-card>
   </q-dialog>
 </template>

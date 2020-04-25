@@ -14,11 +14,11 @@
         <q-toolbar-title>{{displayName}}</q-toolbar-title>
 
         <q-btn
-          :icon="evaMicOffOutline"
+          :icon="evaMicOutline"
           v-if="micProducer != null"
           round
-          color="accent"
-          text-color="primary"
+          :loading="micInProgress"
+          color="pink"
           class="q-mr-sm"
           dense
           @click="disableMic"
@@ -33,12 +33,14 @@
         </q-btn>
 
         <q-btn
-          :icon="evaMicOutline"
+          :icon="evaMicOffOutline"
           v-else
           round
-          color="pink"
+          :loading="micInProgress"
           class="q-mr-sm"
           dense
+          color="accent"
+          text-color="primary"
           @click="enableMic"
         >
           <q-tooltip
@@ -52,12 +54,12 @@
 
         <q-btn
           v-if="webcamProducer != null"
-          :icon="evaVideoOffOutline"
+          :icon="evaVideoOutline"
           round
-          color="accent"
-          text-color="primary"
           class="q-mr-sm"
           dense
+          color="pink"
+          :loading="webcamInProgress"
           @click="disableWebcam"
         >
           <q-tooltip
@@ -71,11 +73,13 @@
 
         <q-btn
           v-else
-          :icon="evaVideoOutline"
+          :icon="evaVideoOffOutline"
           round
-          color="pink"
+          color="accent"
+          text-color="primary"
           class="q-mr-sm"
           dense
+          :loading="webcamInProgress"
           @click="enableWebcam"
         >
           <q-tooltip
@@ -88,12 +92,12 @@
         </q-btn>
 
         <q-btn
-          :icon="evaDownloadOutline"
+          :icon="evaUploadOutline"
           v-if="shareProducer != null"
           round
-          color="accent"
-          text-color="primary"
           dense
+          color="pink"
+          :loading="shareInProgress"
           @click="disableShare"
         >
           <q-tooltip
@@ -105,7 +109,16 @@
           >Cancelar compartilhamento de tela</q-tooltip>
         </q-btn>
 
-        <q-btn v-else :icon="evaUploadOutline" round color="pink" dense @click="enableShare">
+        <q-btn
+          v-else
+          :icon="evaDownloadOutline"
+          round
+          color="accent"
+          text-color="primary"
+          dense
+          @click="enableShare"
+          :loading="shareInProgress"
+        >
           <q-tooltip
             anchor="bottom middle"
             self="top middle"
@@ -133,7 +146,7 @@
         </div>
         <template v-for="peer in Object.values(peers)">
           <div :key="peer.id" v-if="peer.consumers.some(consumer => consumer.type === 'simple')">
-            <PeerView :peer="peer" />
+            <PeerView :peer="peer" :allowsAudio="allowsAudio" />
           </div>
         </template>
       </q-page>
@@ -161,11 +174,25 @@ import {
   evaDownloadOutline,
   evaMenuOutline
 } from "@quasar/extras/eva-icons";
+import JoinDialog from "../components/JoinDialog.vue";
 
 const VIDEO_CONSTRAINS = {
-  qvga: { width: { exact: 320 }, height: { exact: 240 } },
-  vga: { width: { exact: 640 }, height: { exact: 480 } },
-  hd: { width: { exact: 1280 }, height: { exact: 720 } }
+  low: {
+    width: { ideal: 320 },
+    aspectRatio: 1.334
+  },
+  medium: {
+    width: { ideal: 640 },
+    aspectRatio: 1.334
+  },
+  high: {
+    width: { ideal: 1280 },
+    aspectRatio: 1.334
+  },
+  veryhigh: {
+    width: { ideal: 1920 },
+    aspectRatio: 1.334
+  }
 };
 
 const PC_PROPRIETARY_CONSTRAINTS = {
@@ -183,6 +210,8 @@ const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
 
 // Used for VP9 desktop sharing.
 const VIDEO_SVC_ENCODINGS = [{ scalabilityMode: "S3T3", dtx: true }];
+
+const ICE_SERVERS = [];
 
 export default {
   name: "App",
@@ -208,13 +237,16 @@ export default {
       webcamProducer: null,
       sendTransport: null,
       micProducer: null,
-      webcamInProgress: true,
+      webcamInProgress: false,
+      micInProgress: false,
+      shareInProgress: false,
       audioOnly: false,
       useSimulcast: false,
       canChangeWebcam: false,
+      allowsAudio: false,
       webcam: {
         device: null,
-        resolution: "hd"
+        resolution: "medium"
       }
     };
   },
@@ -284,6 +316,8 @@ export default {
         return;
       }
 
+      this.micInProgress = true;
+
       let track;
 
       try {
@@ -338,12 +372,16 @@ export default {
         });
 
         if (track) track.stop();
+      } finally {
+        this.micInProgress = false;
       }
     },
     async disableMic() {
       console.debug("disableMic()");
 
       if (!this.micProducer) return;
+
+      this.micInProgress = true;
 
       this.micProducer.close();
 
@@ -358,6 +396,8 @@ export default {
           color: "negative",
           message: `Error closing server-side mic Producer: ${error}`
         });
+      } finally {
+        this.micInProgress = false;
       }
 
       this.micProducer = null;
@@ -392,7 +432,7 @@ export default {
 
           const stream = await navigator.mediaDevices.getUserMedia({
             video: {
-              deviceId: { exact: device.deviceId },
+              deviceId: { ideal: device.deviceId },
               ...VIDEO_CONSTRAINS[resolution]
             }
           });
@@ -426,7 +466,12 @@ export default {
             }
           });
         } else {
-          this.webcamProducer = await this.sendTransport.produce({ track });
+          this.webcamProducer = await this.sendTransport.produce({
+            track,
+            appData: {
+              source: "webcam"
+            }
+          });
         }
 
         this.$set(this.producers, this.webcamProducer.id, {
@@ -462,9 +507,9 @@ export default {
         });
 
         if (track) track.stop();
+      } finally {
+        this.webcamInProgress = false;
       }
-
-      this.webcamInProgress = false;
     },
     async disableWebcam() {
       console.debug("disableWebcam()");
@@ -496,6 +541,8 @@ export default {
       if (this.webcamProducer) {
         await this.disableWebcam();
       }
+
+      this.shareInProgress = true;
 
       const stream = await navigator.mediaDevices.getDisplayMedia({
         audio: false,
@@ -534,9 +581,13 @@ export default {
       this.shareProducer.on("trackended", () => {
         this.disableShare().catch(() => {});
       });
+
+      this.shareInProgress = false;
     },
     async disableShare() {
       if (!this.shareProducer) return;
+
+      this.shareInProgress = true;
 
       this.shareProducer.close();
 
@@ -551,6 +602,8 @@ export default {
           type: "error",
           message: `Error closing server-side share Producer: ${error}`
         });
+      } finally {
+        this.shareInProgress = false;
       }
 
       this.shareProducer = null;
@@ -628,6 +681,8 @@ export default {
               // We are ready. Answer the protoo request so the server will
               // resume this Consumer (which was paused for now if video).
               accept();
+
+              //debugger;
 
               // If audio-only mode is enabled, pause it.
               if (consumer.kind === "video" && this.audioOnly)
@@ -795,6 +850,11 @@ export default {
       }
     },
     async joinRoom() {
+      const userInfo = await this.peer.request("userInfo");
+
+      this.displayName = userInfo.displayName;
+      this.role = userInfo.role;
+
       this.mediasoupDevice = new mediasoupClient.Device({
         handlerName: undefined
       });
@@ -828,7 +888,7 @@ export default {
           iceCandidates,
           dtlsParameters,
           sctpParameters,
-          iceServers: [],
+          iceServers: ICE_SERVERS,
           proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS
         });
 
@@ -878,7 +938,7 @@ export default {
             try {
               // eslint-disable-next-line no-shadow
               const { id } = await this.peer.request("produceData", {
-                transportId: this._sendTransport.id,
+                transportId: this.sendTransport.id,
                 sctpStreamParameters,
                 label,
                 protocol,
@@ -917,7 +977,7 @@ export default {
           iceCandidates,
           dtlsParameters,
           sctpParameters,
-          iceServers: []
+          iceServers: ICE_SERVERS
         });
 
         this.recvTransport.on(
@@ -937,8 +997,9 @@ export default {
           }
         );
       }
+      
 
-      const { peers, displayName, role } = await this.peer.request("join", {
+      const { peers } = await this.peer.request("join", {
         device: this.device,
         rtpCapabilities: this.consume
           ? this.mediasoupDevice.rtpCapabilities
@@ -957,10 +1018,33 @@ export default {
         });
       }
 
-      this.displayName = displayName;
-      this.role = role;
-
       this.connected = true;
+
+      const { shareScreen, shareAudio, shareWebcam } = await new Promise(
+        (resolve, reject) => {
+          this.$q
+            .dialog({
+              component: JoinDialog,
+              displayName: userInfo.displayName
+            })
+            .onOk(resolve)
+            .onCancel(reject);
+        }
+      );
+
+      this.allowsAudio = true;
+
+      if (shareScreen) {
+        this.enableShare().catch(() => {});
+      }
+
+      if (shareWebcam) {
+        this.enableWebcam().catch(() => {});
+      }
+
+      if (shareAudio) {
+        this.enableMic().catch(() => {});
+      }
     },
     async setMaxSendingSpatialLayer(spatialLayer) {
       console.debug(
@@ -1209,7 +1293,7 @@ export default {
 
         consumer.locallyPaused = true;
       } catch (error) {
-        console.error("_resumeConsumer() | failed:%o", error);
+        console.error("resumeConsumer() | failed:%o", error);
 
         store.dispatch(
           requestActions.notify({
@@ -1231,7 +1315,7 @@ export default {
       if (this.externalVideo.captureStream)
         this.externalVideoStream = this.externalVideo.captureStream();
       else if (this_externalVideo.mozCaptureStream)
-        this._externalVideoStream = this.externalVideo.mozCaptureStream();
+        this.externalVideoStream = this.externalVideo.mozCaptureStream();
       else throw new Error("video.captureStream() not supported");
 
       return this.externalVideoStream;
