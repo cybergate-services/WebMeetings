@@ -137,11 +137,7 @@ async function runExpressServer() {
             aud: config.jwt.AUDIENCE
         }, config.jwt.SECRET, { algorithm: 'HS256' }, function (err, token) {
             if (err)
-            {
-                console.error(err);
-
                 return res.status(500).send('Internal Server Error');
-            }
 
             res.status(200).send(token);
         });
@@ -162,7 +158,7 @@ async function runExpressServer() {
             sub: cuid(),
             iss: config.jwt.ISSUER,
             aud: config.jwt.AUDIENCE
-        }, config.jwt.SECRET, { algorithm: 'RS256' }, function (err, token) {
+        }, config.jwt.SECRET, { algorithm: 'HS256' }, function (err, token) {
             if (err)
                 return res.status(500).send('Internal Server Error');
 
