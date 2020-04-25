@@ -9,6 +9,3 @@ services:
       - "443:443"
       - "40000-40200:40000-40200/udp"
       - "40000-40200:40000-40200/tcp"
-    network_mode: "host"
-    stdin_open: true
-    tty: true
