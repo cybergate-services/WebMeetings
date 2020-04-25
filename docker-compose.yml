@@ -4,6 +4,8 @@ services:
   web:
     image: dungeon2567/web-meetings:latest
     restart: always
+    environment:
+        MEDIASOUP_ANNOUNCED_IP: '45.55.58.119'
     ports:
       - "80:80"
       - "443:443"
