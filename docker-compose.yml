@@ -1,23 +1,30 @@
 version: "3.7"
 
 services:
-  nginx:
+  server:
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.server
       context: .
     restart: always
     environment:
         MEDIASOUP_ANNOUNCED_IP: '45.55.58.119'
+  nginx:
+    build:
+      dockerfile: Dockerfile.client
+      context: .
+    restart: always
+    depends_on: 
+      - server
     ports:
       - "80:80"
       - "443:443"
-      - "40000-40200:40000-40200/udp"
-      - "40000-40200:40000-40200/tcp"
     volumes: 
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
   certbot:
     image: certbot/certbot
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"

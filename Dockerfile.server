@@ -1,0 +1,17 @@
+FROM node:latest as build-stage
+RUN apt-get update && apt-get install build-essential -y
+WORKDIR /server
+COPY ./Server/package*.json ./
+RUN npm install --only=production
+
+FROM node:latest
+
+WORKDIR /server
+COPY --from=build-stage /server/node_modules /server/node_modules
+COPY ./Server ./
+
+EXPOSE 3000
+EXPOSE 40000-40200/udp
+EXPOSE 40000-40200/tcp
+
+CMD node /server/index.js
