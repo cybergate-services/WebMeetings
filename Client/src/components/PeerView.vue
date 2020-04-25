@@ -1,6 +1,6 @@
 <template>
   <div class="video-container">
-    <video ref="video" class="full-width" autoplay muted v-if="mediaStream" controls playsinline />
+    <video ref="video" class="full-width" autoplay muted v-if="mediaStream" playsinline />
 
     <div class="username">{{peer.displayName}}</div>
 
@@ -57,7 +57,6 @@ export default {
     volume() {
       this.$nextTick(() => {
         this.$refs.video.volume = this.volume / 100;
-        console.log(this.volume);
       });
     },
     muted: {
