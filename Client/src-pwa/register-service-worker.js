@@ -1,4 +1,9 @@
 import { register } from 'register-service-worker'
+import { Notify } from 'quasar'
+
+import {
+  evaSyncOutline,
+} from "@quasar/extras/eva-icons";
 
 // The ready(), registered(), cached(), updatefound() and updated()
 // events passes a ServiceWorkerRegistration instance in their arguments.
@@ -29,6 +34,29 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   updated (/* registration */) {
     // console.log('New content is available; please refresh.')
+
+    Notify.create({
+      color: "primary",
+      icon: evaSyncOutline,
+      message: 'Updated content is available. Please refresh the page.',
+      timeout: 0,
+      multiLine: true,
+      position: 'top',
+      actions: [
+        {
+          label: 'Refresh',
+          color: 'yellow',
+          handler: () => {
+            window.location.reload()
+          }
+        },
+        {
+          label: 'Dismiss',
+          color: 'white',
+          handler: () => {}
+        }
+      ]
+    })
   },
 
   offline () {

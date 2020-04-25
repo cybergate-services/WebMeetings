@@ -109,9 +109,44 @@ module.exports = function (/* ctx */) {
         theme_color: '#e91e63',
         icons: [
           {
-            src: 'statics/icons/favicon.svg',
-            sizes: '24x24',
-            type: 'image/svg'
+            src: 'statics/icons/icon120px.png',
+            sizes: '120x120',
+            type: 'image/png'
+          },
+          {
+            src: 'statics/icons/icon128px.png',
+            sizes: '128x128',
+            type: 'image/png'
+          },
+          {
+            src: 'statics/icons/icon144px.png',
+            sizes: '144x144',
+            type: 'image/png'
+          },
+          {
+            src: 'statics/icons/icon152px.png',
+            sizes: '152x152',
+            type: 'image/png'
+          },
+          {
+            src: 'statics/icons/icon180px.png',
+            sizes: '180x180',
+            type: 'image/png'
+          },
+          {
+            src: 'statics/icons/icon192px.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'statics/icons/icon384px.png',
+            sizes: '384x384',
+            type: 'image/png'
+          },
+          {
+            src: 'statics/icons/icon512px.png',
+            sizes: '512x512',
+            type: 'image/png'
           }
         ]
       }
