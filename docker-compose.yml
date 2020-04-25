@@ -2,7 +2,9 @@ version: "3.7"
 
 services:
   web:
-    image: dungeon2567/web-meetings:latest
+    build:
+      dockerfile: Dockerfile
+      context: .
     restart: always
     environment:
         MEDIASOUP_ANNOUNCED_IP: '45.55.58.119'
@@ -11,3 +13,11 @@ services:
       - "443:443"
       - "40000-40200:40000-40200/udp"
       - "40000-40200:40000-40200/tcp"
+  volumes: 
+    - ./data/certbot/conf:/etc/letsencrypt
+    - ./data/certbot/www:/var/www/certbot
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
