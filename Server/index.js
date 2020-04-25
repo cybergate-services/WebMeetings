@@ -128,7 +128,7 @@ async function runExpressServer() {
         const { displayName } = req.body;
 
         jwt.sign({
-            exp: Math.floor(Date.now() / 1000) + (60 * 15),
+            exp: Math.floor(Date.now() / 1000) + (60 * 30),
             iat: Math.floor(Date.now() / 1000),
             role: "user",
             displayName: displayName,
@@ -137,7 +137,11 @@ async function runExpressServer() {
             aud: config.jwt.AUDIENCE
         }, config.jwt.SECRET, { algorithm: 'RS256' }, function (err, token) {
             if (err)
+            {
+                console.error(err);
+                
                 return res.status(500).send('Internal Server Error');
+            }
 
             res.status(200).send(token);
         });
