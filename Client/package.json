@@ -1,8 +1,8 @@
 {
   "name": "client",
   "version": "0.0.1",
-  "description": "WebMeetings Client",
-  "productName": "WebMeetings Client",
+  "description": "Web Meetings",
+  "productName": "Web Meetings",
   "cordovaId": "org.cordova.quasar.app",
   "capacitorId": "",
   "author": "dungeon2567 <31074903+dungeon2567@users.noreply.github.com>",
