@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile.server
       context: .
     restart: always
+    ports:
+      - "3000:3000"
     environment:
         MEDIASOUP_ANNOUNCED_IP: '45.55.58.119'
   nginx:
