@@ -241,7 +241,7 @@ export default {
       micInProgress: false,
       shareInProgress: false,
       audioOnly: false,
-      useSimulcast: false,
+      useSimulcast: true,
       canChangeWebcam: false,
       allowsAudio: false,
       webcam: {
@@ -558,12 +558,41 @@ export default {
 
       let track = stream.getVideoTracks()[0];
 
-      this.shareProducer = await this.sendTransport.produce({
-        track,
-        appData: {
-          source: "screen"
+      if (this.useSimulcast) {
+        // If VP9 is the only available video codec then use SVC.
+        const firstVideoCodec = this.mediasoupDevice.rtpCapabilities.codecs.find(
+          c => c.kind === "video"
+        );
+
+        let encodings;
+
+        if (firstVideoCodec.mimeType.toLowerCase() === "video/vp9") {
+          encodings = VIDEO_SVC_ENCODINGS;
+        } else {
+          encodings = VIDEO_SIMULCAST_ENCODINGS.map(encoding => ({
+            ...encoding,
+            dtx: true
+          }));
         }
-      });
+
+        this.shareProducer = await this.sendTransport.produce({
+          track,
+          encodings,
+          codecOptions: {
+            videoGoogleStartBitrate: 1000
+          },
+          appData: {
+            share: true
+          }
+        });
+      } else {
+        this.shareProducer = await this.sendTransport.produce({
+          track,
+          appData: {
+            source: "screen"
+          }
+        });
+      }
 
       this.$set(this.producers, this.shareProducer.id, {
         id: this.shareProducer.id,
@@ -997,7 +1026,6 @@ export default {
           }
         );
       }
-      
 
       const { peers } = await this.peer.request("join", {
         device: this.device,
