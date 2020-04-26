@@ -109,42 +109,42 @@ module.exports = function (/* ctx */) {
         theme_color: '#e91e63',
         icons: [
           {
-            src: 'statics/icon120px.png',
+            src: 'statics/icons/icon-120px.png',
             sizes: '120x120',
             type: 'image/png'
           },
           {
-            src: 'statics/icon128px.png',
+            src: 'statics/icons/icon-128px.png',
             sizes: '128x128',
             type: 'image/png'
           },
           {
-            src: 'statics/icon144px.png',
+            src: 'statics/icons/icon-144px.png',
             sizes: '144x144',
             type: 'image/png'
           },
           {
-            src: 'statics/icon152px.png',
+            src: 'statics/icons/icon-152px.png',
             sizes: '152x152',
             type: 'image/png'
           },
           {
-            src: 'statics/icon180px.png',
+            src: 'statics/icons/icon-180px.png',
             sizes: '180x180',
             type: 'image/png'
           },
           {
-            src: 'statics/icon192px.png',
+            src: 'statics/icons/icon-192px.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'statics/icon384px.png',
+            src: 'statics/icons/icon-384px.png',
             sizes: '384x384',
             type: 'image/png'
           },
           {
-            src: 'statics/icon512px.png',
+            src: 'statics/icons/icon-512px.png',
             sizes: '512x512',
             type: 'image/png'
           }
