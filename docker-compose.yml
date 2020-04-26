@@ -18,7 +18,6 @@ services:
       dockerfile: Dockerfile.client
       context: .
     restart: always
-    network_mode: host
     depends_on: 
       - server
     ports:
