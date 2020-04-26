@@ -8,6 +8,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
+      - "40200-40200:40200-40200/tcp"
+      - "40200-40200:40200-40200/udp"
     environment:
         MEDIASOUP_ANNOUNCED_IP: '45.55.58.119'
   nginx:
