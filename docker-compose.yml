@@ -10,7 +10,6 @@ services:
       - "3000:3000"
       - "40000-40200:40000-40200/tcp"
       - "40000-40200:40200-40200/udp"
-    network_mode: host
     environment:
         MEDIASOUP_ANNOUNCED_IP: '45.55.58.119'
   nginx:
@@ -18,7 +17,6 @@ services:
       dockerfile: Dockerfile.client
       context: .
     restart: always
-    network_mode: host
     depends_on: 
       - server
     ports:
