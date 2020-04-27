@@ -140,7 +140,7 @@
     </q-drawer>
 
     <q-page-container>
-      <q-page style="flex flex-center">
+      <q-page class="flex flex-center">
         <q-resize-observer @resize="onResize" />
         <div class="video-layout" :style="sizeSettings.containerStyle">
           <div v-if="webcamProducer || shareProducer" :style="sizeSettings.videoStyle">
@@ -272,7 +272,7 @@ export default {
         let rows = Math.ceil(this.videoCount / cols);
 
         let containerSize =
-          ((this.h - 16 * rows - 16) / rows / 9) * 16 * cols + 16 * cols;
+          ((this.h - 10 * rows - 10) / rows / 9) * 16 * cols + 10 * cols;
         let videoSize = `calc(100% / ${cols})`;
 
         console.log({ rows, cols });
