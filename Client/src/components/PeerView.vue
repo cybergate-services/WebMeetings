@@ -1,29 +1,31 @@
 <template>
-  <div class="video-container" :class="{activeSpeaker: isActiveSpeaker}">
-    <video ref="video" class="full-width" autoplay muted v-if="mediaStream" playsinline />
+  <q-responsive :ratio="16/9" class="video-container" :class="{activeSpeaker: isActiveSpeaker}">
+    <div>
+      <video ref="video" class="full-width" autoplay muted v-if="mediaStream" playsinline />
 
-    <div class="username">{{peer.displayName}}</div>
+      <div class="username">{{peer.displayName}}</div>
 
-    <div
-      class="flex items-center absolute-bottom text-subtitle1 no-wrap q-px-md q-py-sm full-width controls"
-    >
-      <q-icon
-        :name="volume == 0 ? evaVolumeOffOutline : (volume <= 20 ? evaVolumeDownOutline: evaVolumeUpOutline)"
-        size="32px"
-        left
-      />
-      <q-slider
-        v-model="volume"
-        dark
-        :min="0"
-        :max="100"
-        label
-        color="accent"
-        class="col-grow"
-        label-text-color="primary"
-      />
+      <div
+        class="flex items-center absolute-bottom text-subtitle1 no-wrap q-px-md q-py-sm full-width controls"
+      >
+        <q-icon
+          :name="volume == 0 ? evaVolumeOffOutline : (volume <= 20 ? evaVolumeDownOutline: evaVolumeUpOutline)"
+          size="32px"
+          left
+        />
+        <q-slider
+          v-model="volume"
+          dark
+          :min="0"
+          :max="100"
+          label
+          color="accent"
+          class="col-grow"
+          label-text-color="primary"
+        />
+      </div>
     </div>
-  </div>
+  </q-responsive>
 </template>
 
 <script>
@@ -44,7 +46,7 @@ export default {
   props: {
     peer: Object,
     allowsAudio: Boolean,
-    isActiveSpeaker: Boolean,
+    isActiveSpeaker: Boolean
   },
   data() {
     return {
@@ -88,7 +90,7 @@ export default {
       if (this.peer.consumers.length > 0) {
         const mediaStream = new MediaStream();
 
-        for(let track of this.peer.consumers.map(consumer => consumer.track)){
+        for (let track of this.peer.consumers.map(consumer => consumer.track)) {
           mediaStream.addTrack(track);
         }
 
