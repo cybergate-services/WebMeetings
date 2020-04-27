@@ -33,7 +33,7 @@ module.exports =
 					'sctp'
 				],
 			rtcMinPort: 40000,
-			rtcMaxPort: 40500
+			rtcMaxPort: 40400
 		},
 		// mediasoup Router options.
 		// See https://mediasoup.org/documentation/v3/mediasoup/api/#RouterOptions
