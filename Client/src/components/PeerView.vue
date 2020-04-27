@@ -1,6 +1,6 @@
 <template>
   <div class="video-container">
-    <div>
+    <q-responsive class="bg-black" :ratio="16/9">
       <video ref="video" autoplay muted v-if="mediaStream" playsinline />
 
       <div class="username">
@@ -27,7 +27,7 @@
           label-text-color="primary"
         />
       </div>
-    </div>
+    </q-responsive>
   </div>
 </template>
 

@@ -1,9 +1,9 @@
 <template>
   <div class="video-container">
-    <div>
+    <q-responsive class="bg-black" :ratio="16/9">
       <video ref="video" muted autoplay v-if="videoStream" playsinline />
       <div class="username">{{displayName}}</div>
-    </div>
+    </q-responsive>
   </div>
 </template>
 

@@ -140,13 +140,23 @@
     </q-drawer>
 
     <q-page-container>
-      <q-page class="video-layout" :class="`children-${videoCount}`">
-        <div v-if="webcamProducer || shareProducer">
+      <q-page class="video-layout" :style="sizeSettings.containerStyle">
+        <q-resize-observer @resize="onResize" />
+        <div v-if="webcamProducer || shareProducer" :style="sizeSettings.videoStyle">
           <VideoContainer :producers="producers" :displayName="displayName" />
         </div>
         <template v-for="peer in Object.values(peers)">
-          <div :key="peer.id" v-if="peer.consumers.length > 0" :class="{activeSpeaker: activeSpeakerId === peer.id}">
-            <PeerView :peer="peer" :allowsAudio="allowsAudio" :isActiveSpeaker="activeSpeakerId === peer.id" />
+          <div
+            :key="peer.id"
+            v-if="peer.consumers.length > 0"
+            :class="{activeSpeaker: activeSpeakerId === peer.id}"
+            :style="sizeSettings.videoStyle"
+          >
+            <PeerView
+              :peer="peer"
+              :allowsAudio="allowsAudio"
+              :isActiveSpeaker="activeSpeakerId === peer.id"
+            />
           </div>
         </template>
       </q-page>
@@ -221,6 +231,8 @@ export default {
   },
   data() {
     return {
+      w: 1,
+      h: 1,
       leftDrawerOpen: false,
       consume: true,
       produce: true,
@@ -252,10 +264,33 @@ export default {
     };
   },
   computed: {
+    sizeSettings() {
+      if (this.w > this.h) {
+        let cols = Math.ceil(Math.sqrt(this.videoCount));
+        let rows = Math.ceil(this.videoCount / cols);
+
+        let containerSize =
+          ((this.h - 16 * rows - 16) / rows / 9) * 16 * cols + 16 * cols;
+        let videoSize = `calc(100% / ${cols})`;
+
+        console.log({ rows, cols });
+
+        if (containerSize > this.w) {
+          containerSize = this.w;
+        }
+
+        return {
+          containerStyle: { width: `${containerSize}px` },
+          videoStyle: { width: videoSize }
+        };
+      } else return { containerStyle: {}, videoStyle: { width: "100%" } };
+    },
+
     videoCount() {
       return (
         (this.webcamProducer != null || this.shareProducer != null ? 1 : 0) +
-        Object.values(this.peers).filter(peer => peer.consumers.length > 0).length
+        Object.values(this.peers).filter(peer => peer.consumers.length > 0)
+          .length
       );
     }
   },
@@ -295,6 +330,10 @@ export default {
     this.evaDownloadOutline = evaDownloadOutline;
   },
   methods: {
+    onResize({ width, height }) {
+      this.w = width;
+      this.h = height;
+    },
     getWebcamType(device) {
       if (/(back|rear)/i.test(device.label)) {
         console.debug("getWebcamType() | it seems to be a back camera");
