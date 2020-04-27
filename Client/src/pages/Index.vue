@@ -285,7 +285,7 @@ export default {
           containerStyle: { width: `${containerSize}px` },
           videoStyle: { width: videoSize }
         };
-      } else return { containerStyle: {}, videoStyle: { width: "100%" } };
+      } else return { containerStyle: {width: "100%"}, videoStyle: { width: "100%" } };
     },
 
     videoCount() {
