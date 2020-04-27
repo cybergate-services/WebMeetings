@@ -1,7 +1,7 @@
 <template>
   <q-responsive :ratio="16/9" class="video-container">
     <div>
-      <video ref="video" class="full-width" autoplay muted v-if="mediaStream" playsinline />
+      <video ref="video" autoplay muted v-if="mediaStream" playsinline />
 
       <div class="username">
         <q-spinner-rings class="q-mr-sm"  color="light-green" v-if="isActiveSpeaker" size="14px"/>
