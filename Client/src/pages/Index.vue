@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="hHh LpR lFf">
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -130,7 +130,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" overlay show-if-above bordered content-class="bg-grey-1 text-black">
+    <q-drawer v-model="leftDrawerOpen" overlay bordered content-class="bg-grey-1 text-black">
       <q-list>
         <q-item-label header class="text-bold">Participantes</q-item-label>
         <q-item v-for="peer in Object.values(peers)" :key="peer.id" clickable v-ripple>
@@ -218,14 +218,6 @@ export default {
   components: {
     VideoContainer,
     PeerView
-  },
-  watch: {
-    peers: {
-      handler(val) {
-        console.log(val);
-      },
-      deep: true
-    }
   },
   data() {
     return {
