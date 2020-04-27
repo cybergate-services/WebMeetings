@@ -590,8 +590,7 @@ export default {
             videoGoogleStartBitrate: 1000
           },
           appData: {
-            source: "screen",
-            share: true
+            source: "screen"
           }
         });
       } else {
