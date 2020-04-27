@@ -1,6 +1,6 @@
 <template>
   <div class="video-container">
-    <div>
+    <div class="flex">
       <video ref="video" autoplay muted v-if="mediaStream" playsinline />
 
       <div class="username">

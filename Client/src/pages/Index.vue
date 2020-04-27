@@ -130,7 +130,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1 text-black">
+    <q-drawer v-model="leftDrawerOpen" overlay show-if-above bordered content-class="bg-grey-1 text-black">
       <q-list>
         <q-item-label header class="text-bold">Participantes</q-item-label>
         <q-item v-for="peer in Object.values(peers)" :key="peer.id" clickable v-ripple>
