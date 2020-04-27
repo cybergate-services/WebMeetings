@@ -1,10 +1,10 @@
 <template>
-  <q-responsive :ratio="16/9" class="video-container">
+  <div class="video-container">
     <div>
       <video ref="video" muted autoplay v-if="videoStream" playsinline />
       <div class="username">{{displayName}}</div>
     </div>
-  </q-responsive>
+  </div>
 </template>
 
 <script>

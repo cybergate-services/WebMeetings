@@ -1,5 +1,5 @@
 <template>
-  <q-responsive :ratio="16/9" class="video-container">
+  <div class="video-container">
     <div>
       <video ref="video" autoplay muted v-if="mediaStream" playsinline />
 
@@ -28,7 +28,7 @@
         />
       </div>
     </div>
-  </q-responsive>
+  </div>
 </template>
 
 <script>
