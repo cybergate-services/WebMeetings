@@ -249,7 +249,7 @@ export default {
       micInProgress: false,
       shareInProgress: false,
       audioOnly: false,
-      useSimulcast: false,
+      useSimulcast: true,
       canChangeWebcam: false,
       allowsAudio: false,
       webcam: {
