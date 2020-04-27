@@ -56,6 +56,26 @@ export default {
     };
   },
   watch: {
+    "peer.consumers": {
+      deep: true,
+      immediate: true,
+      handler(consumers) {
+        if (consumers) {
+          this.hasAudio = consumers.some(
+            consumer => consumer.track.kind === "audio"
+          );
+
+          this.hasVideo = consumers.some(
+            consumer => consumer.track.kind === "video"
+          );
+        }
+        else
+        {
+          this.hasAudio = false;
+          this.hasVideo = false;
+        }
+      }
+    },
     volume() {
       this.$nextTick(() => {
         this.$refs.video.volume = this.volume / 100;
@@ -64,9 +84,7 @@ export default {
     muted: {
       handler() {
         this.$nextTick(() => {
-          if (!this.muted) {
-            this.$refs.video.muted = this.muted;
-          }
+          this.$refs.video.muted = this.muted;
         });
       },
       immediate: true
@@ -76,6 +94,7 @@ export default {
         this.$nextTick(() => {
           if (this.mediaStream) {
             this.$refs.video.srcObject = this.mediaStream;
+            this.$refs.video.muted = this.muted;
           }
         });
       },
