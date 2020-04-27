@@ -200,9 +200,9 @@ const PC_PROPRIETARY_CONSTRAINTS = {
 };
 
 const VIDEO_SIMULCAST_ENCODINGS = [
-  { maxBitrate: 180000, scaleResolutionDownBy: 4 },
-  { maxBitrate: 360000, scaleResolutionDownBy: 2 },
-  { maxBitrate: 1500000, scaleResolutionDownBy: 1 }
+  { scaleResolutionDownBy: 4 },
+  { scaleResolutionDownBy: 2 },
+  { scaleResolutionDownBy: 1 }
 ];
 
 // Used for VP9 webcam video.
@@ -221,7 +221,7 @@ export default {
   },
   watch: {
     peers: {
-      handler(val){
+      handler(val) {
         console.log(val);
       },
       deep: true
@@ -249,7 +249,7 @@ export default {
       micInProgress: false,
       shareInProgress: false,
       audioOnly: false,
-      useSimulcast: true,
+      useSimulcast: false,
       canChangeWebcam: false,
       allowsAudio: false,
       webcam: {
@@ -590,6 +590,7 @@ export default {
             videoGoogleStartBitrate: 1000
           },
           appData: {
+            source: "screen",
             share: true
           }
         });
