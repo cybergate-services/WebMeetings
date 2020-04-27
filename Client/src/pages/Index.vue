@@ -456,7 +456,7 @@ export default {
 
         if (this.useSimulcast) {
           // If VP9 is the only available video codec then use SVC.
-          const firstVideoCodec = this._mediasoupDevice.rtpCapabilities.codecs.find(
+          const firstVideoCodec = this.mediasoupDevice.rtpCapabilities.codecs.find(
             c => c.kind === "video"
           );
 
