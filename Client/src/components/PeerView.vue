@@ -1,5 +1,5 @@
 <template>
-  <div class="video-container">
+  <div class="video-container" :class="{activeSpeaker: isActiveSpeaker}">
     <video ref="video" class="full-width" autoplay muted v-if="mediaStream" playsinline />
 
     <div class="username">{{peer.displayName}}</div>
@@ -44,7 +44,8 @@ export default {
   name: "PeerView",
   props: {
     peer: Object,
-    allowsAudio: Boolean
+    allowsAudio: Boolean,
+    isActiveSpeaker: Boolean,
   },
   data() {
     return {

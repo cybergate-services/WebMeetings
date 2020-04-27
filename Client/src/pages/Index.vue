@@ -146,7 +146,7 @@
         </div>
         <template v-for="peer in Object.values(peers)">
           <div :key="peer.id" v-if="peer.consumers.length > 0">
-            <PeerView :peer="peer" :allowsAudio="allowsAudio" />
+            <PeerView :peer="peer" :allowsAudio="allowsAudio" :isActiveSpeaker="activeSpeakerId === peer.id" />
           </div>
         </template>
       </q-page>
@@ -250,6 +250,7 @@ export default {
       shareInProgress: false,
       audioOnly: false,
       useSimulcast: true,
+      useSharingSimulcast: false,
       canChangeWebcam: false,
       allowsAudio: false,
       webcam: {
@@ -558,15 +559,15 @@ export default {
           displaySurface: "monitor",
           logicalSurface: true,
           cursor: true,
-          width: { max: 1280 },
-          height: { max: 720 },
+          width: { max: 1920 },
+          height: { max: 1080 },
           frameRate: { max: 30 }
         }
       });
 
       let track = stream.getVideoTracks()[0];
 
-      if (this.useSimulcast) {
+      if (this.useSharingSimulcast) {
         // If VP9 is the only available video codec then use SVC.
         const firstVideoCodec = this.mediasoupDevice.rtpCapabilities.codecs.find(
           c => c.kind === "video"
