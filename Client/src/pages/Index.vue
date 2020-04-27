@@ -285,7 +285,11 @@ export default {
           containerStyle: { width: `${containerSize}px` },
           videoStyle: { width: videoSize }
         };
-      } else return { containerStyle: {width: "100%"}, videoStyle: { width: "100%" } };
+      } else
+        return {
+          containerStyle: { width: "100%" },
+          videoStyle: { width: "100%" }
+        };
     },
 
     videoCount() {
@@ -297,6 +301,12 @@ export default {
     }
   },
   created() {
+    window.addEventListener("resize", this.onResize);
+
+    try {
+      screen.orientation.lock("landscape");
+    } catch {}
+
     const params = new URLSearchParams(window.location.search);
     const t = params.get("t");
 
@@ -332,11 +342,9 @@ export default {
     this.evaDownloadOutline = evaDownloadOutline;
   },
   methods: {
-    onResize({ width, height }) {
-      this.w = width;
-      this.h = height;
-
-      console.log({h: this.h, w: this.w});
+    onResize() {
+      this.w = window.innerWidth;
+      this.h = window.innerHeight - 50;
     },
     getWebcamType(device) {
       if (/(back|rear)/i.test(device.label)) {

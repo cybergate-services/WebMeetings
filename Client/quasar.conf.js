@@ -103,8 +103,8 @@ module.exports = function (/* ctx */) {
         name: 'Web Meetings',
         short_name: 'Web Meetings',
         description: 'Web Meetings',
-        display: 'standalone',
-        orientation: 'portrait',
+        display: 'fullscreen',
+        orientation: 'landscape',
         background_color: '#243b55',
         theme_color: '#e91e63',
         icons: [
