@@ -11,7 +11,7 @@ services:
       - "40000-40400:40000-40400/tcp"
       - "40000-40400:40000-40400/udp"
     environment:
-        MEDIASOUP_ANNOUNCED_IP: '167.172.238.110'
+        MEDIASOUP_ANNOUNCED_IP: '167.172.250.57'
   nginx:
     build:
       dockerfile: Dockerfile.client
