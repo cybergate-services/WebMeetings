@@ -18,6 +18,8 @@
     right: 0;
     padding-left: 4px;
     padding-right: 4px;
+    display: flex;
+    align-items: center;
 }
 
 .video-container:not(:hover) .controls {
@@ -31,14 +33,7 @@
 .video-container {
     width: 100%;
     position: relative;
-    transform: scale(1);
-    transform-origin: center;
-    transition: transform 0.3s ease-in-out;
     background: black;
-}
-
-.video-container.activeSpeaker {
-     transform: scale(1.2);
 }
 
 .video-layout {
@@ -50,12 +45,12 @@
 }
 
 .video-layout > div {
-    height 100%;
+    height: 100%;
     width: 100%;
     padding: 8px;
 
     video {
-        max-height: 100%;
+        height: 100%;
     }
 }
 
@@ -96,32 +91,32 @@
     width: calc((100% / 3));
 }
 
-.video-layout.children-10 div {
-    width: calc((100% / 4))
+.video-layout.children-10 > div {
+    width: calc((100% / 4));
 }
 
-.video-layout.children-11 div {
-    width: calc((100% / 4))
+.video-layout.children-11 > div {
+    width: calc((100% / 4));
 }
 
-.video-layout.children-12 div {
-    width: calc((100% / 4))
+.video-layout.children-12 > div {
+    width: calc((100% / 4));
 }
 
-.video-layout.children-13 div {
-    width: calc((100% / 4))
+.video-layout.children-13 > div {
+    width: calc((100% / 4));
 }
 
-.video-layout.children-14 div {
-    width: calc((100% / 4))
+.video-layout.children-14 > div {
+    width: calc((100% / 4));
 }
 
-.video-layout.children-15 div {
-    width: calc((100% / 4))
+.video-layout.children-15 > div {
+    width: calc((100% / 4));
 }
 
-.video-layout.children-16 div {
-    width: calc((100% / 4))
+.video-layout.children-16 > div {
+    width: calc((100% / 4));
 }
 
 .video-layout.children-1 video {

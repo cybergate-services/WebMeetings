@@ -4,7 +4,7 @@
       <video ref="video" class="full-width" autoplay muted v-if="mediaStream" playsinline />
 
       <div class="username">
-        <q-spinner-audio color="pink" v-if="isActiveSpeaker" size="12px"></q-spinner-audio>
+        <q-spinner-rings class="q-mr-sm"  color="light-green" v-if="isActiveSpeaker" size="12px"/>
         {{peer.displayName}}
       </div>
 
