@@ -140,25 +140,27 @@
     </q-drawer>
 
     <q-page-container>
-      <q-page class="video-layout" :style="sizeSettings.containerStyle">
+      <q-page style="flex flex-center">
         <q-resize-observer @resize="onResize" />
-        <div v-if="webcamProducer || shareProducer" :style="sizeSettings.videoStyle">
-          <VideoContainer :producers="producers" :displayName="displayName" />
-        </div>
-        <template v-for="peer in Object.values(peers)">
-          <div
-            :key="peer.id"
-            v-if="peer.consumers.length > 0"
-            :class="{activeSpeaker: activeSpeakerId === peer.id}"
-            :style="sizeSettings.videoStyle"
-          >
-            <PeerView
-              :peer="peer"
-              :allowsAudio="allowsAudio"
-              :isActiveSpeaker="activeSpeakerId === peer.id"
-            />
+        <div class="video-layout" :style="sizeSettings.containerStyle">
+          <div v-if="webcamProducer || shareProducer" :style="sizeSettings.videoStyle">
+            <VideoContainer :producers="producers" :displayName="displayName" />
           </div>
-        </template>
+          <template v-for="peer in Object.values(peers)">
+            <div
+              :key="peer.id"
+              v-if="peer.consumers.length > 0"
+              :class="{activeSpeaker: activeSpeakerId === peer.id}"
+              :style="sizeSettings.videoStyle"
+            >
+              <PeerView
+                :peer="peer"
+                :allowsAudio="allowsAudio"
+                :isActiveSpeaker="activeSpeakerId === peer.id"
+              />
+            </div>
+          </template>
+        </div>
       </q-page>
     </q-page-container>
   </q-layout>
