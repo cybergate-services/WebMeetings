@@ -335,6 +335,8 @@ export default {
     onResize({ width, height }) {
       this.w = width;
       this.h = height;
+
+      console.log({h: this.h, w: this.w});
     },
     getWebcamType(device) {
       if (/(back|rear)/i.test(device.label)) {
@@ -795,6 +797,7 @@ export default {
 
           this.$set(this.peers, peer.id, {
             ...peer,
+            volume: 100,
             consumers: [],
             dataConsumers: []
           });
@@ -1083,6 +1086,7 @@ export default {
       for (const peer of peers) {
         this.$set(this.peers, peer.id, {
           ...peer,
+          volume: 100,
           consumers: [],
           dataConsumers: []
         });
@@ -1103,6 +1107,8 @@ export default {
       );
 
       this.allowsAudio = true;
+
+      this.$q.fullscreen.request();
 
       if (shareScreen) {
         this.enableShare().catch(() => {});

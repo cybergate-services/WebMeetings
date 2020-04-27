@@ -1,7 +1,7 @@
 <template>
   <div class="video-container">
     <q-responsive class="bg-black" :ratio="16/9">
-      <video ref="video" autoplay muted v-if="mediaStream" playsinline />
+      <video ref="video" autoplay muted :volume="peer.volume / 100" v-if="mediaStream" playsinline />
 
       <div class="username">
         <q-spinner-rings class="q-mr-sm"  color="light-green" v-if="isActiveSpeaker" size="18px"/>
@@ -12,12 +12,12 @@
         class="flex items-center absolute-bottom text-subtitle1 no-wrap q-px-md q-py-sm full-width controls"
       >
         <q-icon
-          :name="volume == 0 ? evaVolumeOffOutline : (volume <= 20 ? evaVolumeDownOutline: evaVolumeUpOutline)"
+          :name="peer.volume == 0 ? evaVolumeOffOutline : (peer.volume <= 20 ? evaVolumeDownOutline: evaVolumeUpOutline)"
           size="32px"
           left
         />
         <q-slider
-          v-model="volume"
+          v-model="peer.volume"
           dark
           :min="0"
           :max="100"
@@ -53,7 +53,6 @@ export default {
   },
   data() {
     return {
-      volume: 100,
       hasAudio: false,
       hasVideo: false
     };
@@ -76,11 +75,6 @@ export default {
           this.hasVideo = false;
         }
       }
-    },
-    volume() {
-      this.$nextTick(() => {
-        this.$refs.video.volume = this.volume / 100;
-      });
     },
     muted: {
       handler() {
