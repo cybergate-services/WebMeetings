@@ -219,6 +219,14 @@ export default {
     VideoContainer,
     PeerView
   },
+  watch: {
+    peers: {
+      handler(val){
+        console.log(val);
+      },
+      deep: true
+    }
+  },
   data() {
     return {
       leftDrawerOpen: false,
