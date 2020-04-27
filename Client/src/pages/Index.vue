@@ -145,7 +145,7 @@
           <VideoContainer :producers="producers" :displayName="displayName" />
         </div>
         <template v-for="peer in Object.values(peers)">
-          <div :key="peer.id" v-if="peer.consumers.some(consumer => consumer.type === 'simple')">
+          <div :key="peer.id" v-if="peer.consumers.length > 0">
             <PeerView :peer="peer" :allowsAudio="allowsAudio" />
           </div>
         </template>
@@ -218,14 +218,6 @@ export default {
   components: {
     VideoContainer,
     PeerView
-  },
-  watch: {
-    peers: {
-      handler(val){
-        console.log(val);
-      },
-      deep: true
-    }
   },
   data() {
     return {
