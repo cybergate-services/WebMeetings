@@ -145,7 +145,7 @@
           <VideoContainer :producers="producers" :displayName="displayName" />
         </div>
         <template v-for="peer in Object.values(peers)">
-          <div :key="peer.id" v-if="peer.consumers.length > 0">
+          <div :key="peer.id" v-if="peer.consumers.length > 0" :class="{activeSpeaker: activeSpeakerId === peer.id}">
             <PeerView :peer="peer" :allowsAudio="allowsAudio" :isActiveSpeaker="activeSpeakerId === peer.id" />
           </div>
         </template>
