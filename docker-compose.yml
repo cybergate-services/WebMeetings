@@ -7,7 +7,7 @@ services:
       context: .
     restart: always
     ports:
-      - "3000:3000"
+      - "9008:9008"
       - "40000-40400:40000-40400/tcp"
       - "40000-40400:40000-40400/udp"
     environment:
