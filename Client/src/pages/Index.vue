@@ -263,7 +263,7 @@ export default {
     videoCount() {
       return (
         (this.webcamProducer != null || this.shareProducer != null ? 1 : 0) +
-        this.peers.filter(peer => peer.consumers.length > 0).length;
+        this.peers.filter(peer => peer.consumers.length > 0).length);
       );
     }
   },

@@ -47,7 +47,7 @@ register(process.env.SERVICE_WORKER_FILE, {
           label: 'Refresh',
           color: 'yellow',
           handler: () => {
-            window.location.reload()
+            window.location.reload(true)
           }
         },
         {
