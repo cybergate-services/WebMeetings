@@ -275,8 +275,6 @@ export default {
           ((this.h - 10 * rows - 10) / rows / 9) * 16 * cols + 10 * cols;
         let videoSize = `calc(100% / ${cols})`;
 
-        console.log({ rows, cols });
-
         if (containerSize > this.w) {
           containerSize = this.w;
         }
@@ -302,10 +300,6 @@ export default {
   },
   created() {
     window.addEventListener("resize", this.onResize);
-
-    try {
-      screen.orientation.lock("landscape");
-    } catch {}
 
     const params = new URLSearchParams(window.location.search);
     const t = params.get("t");
@@ -1116,8 +1110,6 @@ export default {
 
       this.allowsAudio = true;
 
-      this.$q.fullscreen.request();
-
       if (shareScreen) {
         this.enableShare().catch(() => {});
       }
@@ -1129,6 +1121,12 @@ export default {
       if (shareAudio) {
         this.enableMic().catch(() => {});
       }
+
+      try {
+        screen.orientation.lock("landscape");
+      } catch {}
+
+      this.$q.fullscreen.request();
     },
     async setMaxSendingSpatialLayer(spatialLayer) {
       console.debug(
