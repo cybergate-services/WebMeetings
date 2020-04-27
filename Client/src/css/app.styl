@@ -61,17 +61,23 @@
 
 .video-layout.children-2 > div {
     max-width: calc((100% / 2));
-    max-height: calc((100vh - 50px) - 16px);
+    max-height: calc((100vh - 66px) - 16px);
 }
 
 .video-layout.children-3 > div {
     max-width: calc((100% / 2));
-    max-height: calc((100vh - 50px) / 2 - 16px);
+
+    video {
+        max-height: calc((100vh - 50px) / 2 - 65px);
+    }
 }
 
 .video-layout.children-4 > div {
     max-width: calc((100% / 2));
-    max-height: calc((100vh - 50px) / 2 - 16px);
+    
+    video {
+        max-height: calc((100vh - 50px) / 2 - 65px);
+    }
 }
 
 .video-layout.children-5 > div {
@@ -121,7 +127,6 @@
 .video-layout.children-16 > div {
     width: calc((100% / 4));
 }
-
 
 @media only screen and (max-width: 600px) {
     .video-layout > div {
