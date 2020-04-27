@@ -6,7 +6,6 @@
 
     <div
       class="flex items-center absolute-bottom text-subtitle1 no-wrap q-px-md q-py-sm full-width controls"
-      v-if="1==2"
     >
       <q-icon
         :name="volume == 0 ? evaVolumeOffOutline : (volume <= 20 ? evaVolumeDownOutline: evaVolumeUpOutline)"
