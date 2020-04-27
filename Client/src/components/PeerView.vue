@@ -1,9 +1,12 @@
 <template>
-  <q-responsive :ratio="16/9" class="video-container" :class="{activeSpeaker: isActiveSpeaker}">
+  <q-responsive :ratio="16/9" class="video-container">
     <div>
       <video ref="video" class="full-width" autoplay muted v-if="mediaStream" playsinline />
 
-      <div class="username">{{peer.displayName}}</div>
+      <div class="username">
+        <q-spinner-audio color="pink" v-if="isActiveSpeaker" size="12px"></q-spinner-audio>
+        {{peer.displayName}}
+      </div>
 
       <div
         class="flex items-center absolute-bottom text-subtitle1 no-wrap q-px-md q-py-sm full-width controls"
@@ -68,9 +71,7 @@ export default {
           this.hasVideo = consumers.some(
             consumer => consumer.track.kind === "video"
           );
-        }
-        else
-        {
+        } else {
           this.hasAudio = false;
           this.hasVideo = false;
         }
